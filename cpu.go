@@ -107,7 +107,13 @@ func (reg *Register) ldiHLA() {
 	reg.l = byte(address)
 }
 
-func (reg *Register) ldhnA()
+func (reg *Register) ldhnA(value byte) {
+	io[value] = reg.a
+}
+
+func (reg *Register) ldhAn(value byte) {
+	reg.a = io[value]
+}
 
 /* *************************************** */
 /* 8 bit ALU                               */
@@ -131,6 +137,7 @@ func (reg *Register) addAn(value byte) {
 	}
 	reg.a = byte(result & 0xFF)
 }
+
 func (reg *Register) addCarry(value byte) {
 	if hasBit(uint16(reg.flags), 4) {
 		value++
