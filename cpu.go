@@ -63,6 +63,7 @@ func (reg *Register) ldr1r2(destination string, source string) {
 	}
 	*(reg_map[destination]) = *(reg_map[source])
 }
+
 func (reg *Register) ldAn(value byte) {
 	reg.a = value
 }
@@ -113,6 +114,70 @@ func (reg *Register) ldhnA(value byte) {
 
 func (reg *Register) ldhAn(value byte) {
 	reg.a = io[value]
+}
+
+/* *************************************** */
+/* 16 bit loads                            */
+/* *************************************** */
+
+func (reg *Register) ldnnn(value uint16, destination string) {
+	r1 := byte(value >> 8)
+	r2 := byte(value)
+	switch destination {
+	case "BC":
+		reg.b = r1
+		reg.c = r2
+	case "DE":
+		reg.d = r1
+		reg.e = r2
+	case "HL":
+		reg.h = r1
+		reg.l = r2
+	case "SP":
+		reg.sp = value
+	}
+}
+
+func (reg *Register) ldSPHL() {
+	value := (uint16(H) << 8) + uint16(L)
+	reg.sp = value
+}
+
+func (reg *Register) ldHLSPn(value byte) {
+	result := uint16(value) + reg.sp
+	r1 := byte(result >> 8)
+	r2 := byte(result)
+	reg.h = r1
+	reg.l = r2
+	// reset Z flag
+	reg.setRegisterFlag(false, 7)
+	// reset N flag
+	reg.setRegisterFlag(false, 6)
+	// set H flag
+	if (reg.sp&0x0F + value&0x0F) > 0x0F {
+		reg.setRegisterFlag(true, 5)
+	} else {
+		reg.setRegisterFlag(false, 5)
+	}
+	//set C flag
+	if (result & 0xFF00) != 0 {
+		reg.setRegisterFlag(true, 4)
+	} else {
+		reg.setRegisterFlag(false, 4)
+	}
+}
+
+func (reg *Register) ldnnSP(value uint16) {
+	//writeWord(value,)
+}
+
+func (reg *Register) pushnn(registers string) {
+	switch registers {
+	case "AF":
+	case "BC":
+	case "DE":
+	case "HL":
+	}
 }
 
 /* *************************************** */
