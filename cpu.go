@@ -13,6 +13,8 @@ type Register struct {
 	pc    uint16
 }
 
+mem Memory
+
 /* *************************************** */
 /* Flags setting function                  */
 /* *************************************** */
@@ -168,16 +170,48 @@ func (reg *Register) ldHLSPn(value byte) {
 }
 
 func (reg *Register) ldnnSP(value uint16) {
-	//writeWord(value,)
+	mem.writeWord(value,reg.sp)
 }
 
 func (reg *Register) pushnn(registers string) {
+	r1,r2 byte
 	switch registers {
 	case "AF":
+		r1=unit16(reg.A)<<8
+		r2=uint16(reg.b)
 	case "BC":
+		r1=unit16(reg.B)<<8
+		r2=uint16(reg.C)
 	case "DE":
+		r1=unit16(reg.D)<<8
+		r2=uint16(reg.E)
 	case "HL":
+		r1=unit16(reg.H)<<8
+		r2=uint16(reg.L)
 	}
+	value:=r1+r2
+	mem.writeWord(reg.sp,value)
+	reg.sp = reg.sp - 2
+}
+
+func (reg *Register) popnn(registers string){
+	r1:=mem.readByte(reg.sp)
+	r2:=mem.readByte(reg.sp+1)
+	switch registers{
+	case "AF":
+		reg.a =r1
+		reg.b = r2
+	case "BC":
+		reg.b = r1
+		reg.c = r2
+	case "DE":
+		reg.d = r1
+		reg.e = r2
+	case "HL":
+		reg.h = r1
+		reg.l = r2
+	}
+	reg.sp = reg.sp + 2
 }
 
 /* *************************************** */
