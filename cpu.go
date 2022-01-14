@@ -412,3 +412,87 @@ func (reg *Register) decn(register string){
 		reg.setRegisterFlag(false, 4)
 	}
 }
+/* *************************************** */
+/* 16 bit ALU                               */
+/* *************************************** */
+
+func (reg *Register) addHLn (value int16){
+	result int32
+	HL:= int16(H)<<8 + int16(L)
+	result = int32(HL) + int32(value)
+	// negative flag
+	reg.setRegisterFlag(false, 6)
+	// carry flag
+	if (result & 0xFFFF0000) != 0{
+		reg.setRegisterFlag(true, 4)
+	} else {
+		reg.setRegisterFlag(false, 4)
+	}
+	// half carry flag
+	if ((int16(result) & 0x0F) + (value & 0x0F)) > 0x0F{
+		reg.setRegisterFlag(true, 5)
+	} else {
+		reg.setRegisterFlag(false, 5)
+	}
+	reg.H = byte(result<<8)
+	reg.L = byte(result)
+}
+
+func (reg *Register) addSPn(value int16){
+	result:= int32(reg.SP) + int32(value)
+	// zero flag
+	reg.setRegisterFlag(false, 7)
+	// negative flag
+	reg.setRegisterFlag(false, 6)
+	// carry flag
+	if (result & 0xFFFF0000) != 0{
+		reg.setRegisterFlag(true, 4)
+	} else {
+		reg.setRegisterFlag(false, 4)
+	}
+	// half carry flag
+	if ((int16(result) & 0x0F) + (value & 0x0F)) > 0x0F{
+		reg.setRegisterFlag(true, 5)
+	} else {
+		reg.setRegisterFlag(false, 5)
+	}
+	reg.sp = int16(result)
+}
+
+func (reg *Register) incnn(register string){
+	switch register{
+	case "BC":
+		result := int16(reg.B)<<8 + int16(reg.C) + 1
+		reg.B = byte(result>>8)
+		reg.C = byte(result)
+	case "DE":
+		result := int16(reg.D)<<8 + int16(reg.E) + 1
+		reg.D = byte(result>>8)
+		reg.E = byte(result)
+	case "HL":
+		result := int16(reg.H)<<8 + int16(reg.L) + 1
+		reg.H = byte(result>>8)
+		reg.L = byte(result)
+	case "SP":
+		reg.SP++
+	}
+}
+
+func (reg *Register) decnn(register string){
+	switch register{
+	case "BC":
+		result := int16(reg.B)<<8 + int16(reg.C) - 1
+		reg.B = byte(result>>8)
+		reg.C = byte(result)
+	case "DE":
+		result := int16(reg.D)<<8 + int16(reg.E) - 1
+		reg.D = byte(result>>8)
+		reg.E = byte(result)
+	case "HL":
+		result := int16(reg.H)<<8 + int16(reg.L) - 1
+		reg.H = byte(result>>8)
+		reg.L = byte(result)
+	case "SP":
+		reg.SP--
+	}
+}
