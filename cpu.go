@@ -412,6 +412,7 @@ func (reg *Register) decn(register string){
 		reg.setRegisterFlag(false, 4)
 	}
 }
+
 /* *************************************** */
 /* 16 bit ALU                               */
 /* *************************************** */
@@ -495,4 +496,113 @@ func (reg *Register) decnn(register string){
 	case "SP":
 		reg.SP--
 	}
+}
+
+/* *************************************** */
+/* misc                                    */
+/* *************************************** */
+
+func (reg *Register) swapn(register string){
+	switch register{
+	case "A":
+		value := reg.A
+		value = ((value & 0xf) << 4) | ((value & 0xf0) >> 4)
+		reg.A = value
+	case "B":
+		value := reg.B
+		value = ((value & 0xf) << 4) | ((value & 0xf0) >> 4)
+		reg.B = value
+	case "C":
+		value := reg.C
+		value = ((value & 0xf) << 4) | ((value & 0xf0) >> 4)
+		reg.C = value
+	case "D":
+		value := reg.D
+		value = ((value & 0xf) << 4) | ((value & 0xf0) >> 4)
+		reg.D = value
+	case "E":
+		value := reg.E
+		value = (value & 0xf) << 4) | ((value & 0xf0) >> 4)
+		reg.E = value
+	case "H":
+		value := reg.H
+		value = ((value & 0xf) << 4) | ((value & 0xf0) >> 4)
+		reg.H = value
+	case "L":
+		value := reg.L
+		value = ((value & 0xf) << 4) | ((value & 0xf0) >> 4)
+		reg.L = value
+	}
+	// zero flag
+	if value == 0{
+		reg.setRegisterFlag(true, 7)
+	}
+	// negative flag
+	reg.setRegisterFlag(6, false)
+	// half carry flag
+	reg.setRegisterFlag(5, false)
+	// carry flag
+	reg.setRegisterFlag(4, false)
+}
+
+func (reg *Register) dAA(){
+	if hasBit(reg.flags, 6){
+		if hasBit(reg.flags, 5){
+			reg.A = (reg.A - 0x06) & 0xFF
+		}
+		if hasBit(reg.flags, 4){
+			reg.A -= 0x60
+		}
+	}
+	else{
+		if hasBit(reg.flags, 5) || (reg.A & 0xF > 9{
+			reg.A += 0x06
+		}
+		if hasBit(reg.flags, 4) || reg.A > 0x9F{
+			reg.A += 0x60
+		}		
+	}
+	// half carry flag
+	reg.setRegisterFlag(false, 5)
+	// zero flag
+	if reg.A {
+		reg.setRegisterFlag(false, 7)
+	}
+	else{
+		reg.setRegisterFlag(true, 7)
+	}
+	// carry flag
+	if reg.A >= 0x100 {
+		reg.setRegisterFlag(true, 4)
+	}
+}
+
+func (reg *Register) cpl(){
+	reg.A = ^reg.A
+	// negative flag
+	reg.setRegisterFlag(true, 6)
+	// haf carry flag
+	reg.setRegisterFlag(true, 5)
+}
+
+func (reg *Register) ccf(){
+	if hasBit(reg.flags, 4){
+		reg.setRegisterFlag(false, 4)
+	}
+	else{
+		reg.setRegisterFlag(true, 4)
+	}
+	// negative flag
+	reg.setRegisterFlag(false, 6)
+	// haf carry flag
+	reg.setRegisterFlag(false, 5)
+}
+
+func (reg *Register) scf(){
+	// carry flag
+	reg.setRegisterFlag(true, 4)
+	// negative flag
+	reg.setRegisterFlag(false, 6)
+	// haf carry flag
+	reg.setRegisterFlag(false, 5)	
 }
