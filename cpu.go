@@ -237,9 +237,178 @@ func (reg *Register) addAn(value byte) {
 	reg.a = byte(result & 0xFF)
 }
 
-func (reg *Register) addCarry(value byte) {
+func (reg *Register) addcAn(value byte) {
 	if hasBit(uint16(reg.flags), 4) {
 		value++
 	}
 	reg.addAn(value)
+}
+
+func (reg *Register) subn(value byte){
+	result := uint16(reg.a) - uint16(value)
+	// negative flag
+	if (result < 0){
+		reg.setRegisterFlag(true, 6)
+	}
+	else{
+		reg.setRegisterFlag(false, 6)
+	}
+	// zero flag
+	if (result == 0){
+		reg.setRegisterFlag(true, 7)
+	}
+	// half carry flag
+	if (reg.a&0x0F + value&0x0F) > 0x0F {
+		reg.setRegisterFlag(true, 5)
+	} else {
+		reg.setRegisterFlag(false, 5)
+	}
+	// carry flag
+	if (result & 0xFF00) != 0 {
+		reg.setRegisterFlag(true, 4)
+	} else {
+		reg.setRegisterFlag(false, 4)
+	}
+	reg.a = byte(result & 0xFF)
+}
+
+func (reg *Register) sbcAn(value byte){
+	if hasBit(uint16(reg.flags), 4) {
+		value++
+	}
+	reg.subn(value)	
+}
+
+func (reg *Register) andn(value byte){
+	result:= reg.A & value
+	// zero flag
+	if (result == 0){
+		reg.setRegisterFlag(true, 7)
+	}
+	// negative flag
+	reg.setRegisterFlag(false, 6)
+	// half carry flag
+	reg.setRegisterFlag(true, 5)
+	// carry flag
+	reg.setRegisterFlag(false, 4)
+	reg.a = result
+}
+
+func (reg *Register) orn(value byte){
+	result:= reg.A | value
+	// zero flag
+	if (result == 0){
+		reg.setRegisterFlag(true, 7)
+	}
+	// negative flag
+	reg.setRegisterFlag(false, 6)
+	// half carry flag
+	reg.setRegisterFlag(false, 5)
+	// carry flag
+	reg.setRegisterFlag(false, 4)
+	reg.A = result
+}
+
+func (reg *Register) xorn(value byte){
+	result:= reg.A ^ value
+	// zero flag
+	if (result == 0){
+		reg.setRegisterFlag(true, 7)
+	}
+	// negative flag
+	reg.setRegisterFlag(false, 6)
+	// half carry flag
+	reg.setRegisterFlag(false, 5)
+	// carry flag
+	reg.setRegisterFlag(false, 4)
+	reg.A = result
+}
+
+func (reg *Register) cpn(value byte){
+	tmp:=reg.A
+	subn(value)
+	reg.A = tmp
+}
+
+func (reg *Register) incn(register string){
+	result int16
+	result++
+	switch register {
+		case "A":
+			reg.A = result
+		case "B":
+			reg.A = result
+		case "C":
+			reg.A = result
+		case "D":
+			reg.A = result
+		case "E":
+			reg.A = result
+		case "F":
+			reg.A = result
+		case "H":
+			reg.A = result
+		case "L":
+			reg.A = result
+	}
+	// carry flag
+	if (result & 0xFF00) != 0 {
+		reg.setRegisterFlag(true, 4)
+	} else {
+		reg.setRegisterFlag(false, 4)
+	}
+	// zero flag
+	reg.setRegisterFlag(false, 6)
+	// half carry flag
+	if (reg.a&0x0F + value&0x0F) > 0x0F {
+		reg.setRegisterFlag(true, 5)
+	} else {
+		reg.setRegisterFlag(false, 5)
+	}
+}
+
+func (reg *Register) decn(register string){
+	result int16
+	result--
+	switch register {
+		case "A":
+			reg.A = result
+		case "B":
+			reg.A = result
+		case "C":
+			reg.A = result
+		case "D":
+			reg.A = result
+		case "E":
+			reg.A = result
+		case "F":
+			reg.A = result
+		case "H":
+			reg.A = result
+		case "L":
+			reg.A = result
+	}
+	// negative flag
+	if (result < 0){
+		reg.setRegisterFlag(true, 6)
+	}
+	else{
+		reg.setRegisterFlag(false, 6)
+	}
+	// zero flag
+	if (result == 0){
+		reg.setRegisterFlag(true, 7)
+	}
+	// half carry flag
+	if (reg.a&0x0F + value&0x0F) > 0x0F {
+		reg.setRegisterFlag(true, 5)
+	} else {
+		reg.setRegisterFlag(false, 5)
+	}
+	// carry flag
+	if (result & 0xFF00) != 0 {
+		reg.setRegisterFlag(true, 4)
+	} else {
+		reg.setRegisterFlag(false, 4)
+	}
 }
