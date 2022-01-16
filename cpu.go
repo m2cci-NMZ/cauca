@@ -70,15 +70,15 @@ func (reg *Register) ldAn(value byte) {
 	reg.a = value
 }
 
-func (reg *Register) ldAC(mem Memory) {
+func (reg *Register) ldAC(mem *Memory) {
 	reg.a = mem.io[reg.c]
 }
 
-func (reg *Register) ldCA(mem Memory) {
+func (reg *Register) ldCA(mem *Memory) {
 	mem.io[reg.c] = reg.a
 }
 
-func (reg *Register) lddAHL(mem Memory) {
+func (reg *Register) lddAHL(mem *Memory) {
 	address := (uint16(reg.h) << 8) + uint16(reg.l)
 	reg.a = mem.readByte(address)
 	address--
@@ -86,7 +86,7 @@ func (reg *Register) lddAHL(mem Memory) {
 	reg.l = byte(address)
 }
 
-func (reg *Register) lddHLA(mem Memory) {
+func (reg *Register) lddHLA(mem *Memory) {
 	address := (uint16(reg.h) << 8) + uint16(reg.l)
 	mem.io[address] = reg.a
 	address--
@@ -94,7 +94,7 @@ func (reg *Register) lddHLA(mem Memory) {
 	reg.l = byte(address)
 }
 
-func (reg *Register) ldiAHL(mem Memory) {
+func (reg *Register) ldiAHL(mem *Memory) {
 	address := (uint16(reg.h) << 8) + uint16(reg.l)
 	reg.a = mem.readByte(address)
 	address++
@@ -102,7 +102,7 @@ func (reg *Register) ldiAHL(mem Memory) {
 	reg.l = byte(address)
 }
 
-func (reg *Register) ldiHLA(mem Memory) {
+func (reg *Register) ldiHLA(mem *Memory) {
 	address := (uint16(reg.h) << 8) + uint16(reg.l)
 	mem.io[address] = reg.a
 	address++
@@ -110,11 +110,11 @@ func (reg *Register) ldiHLA(mem Memory) {
 	reg.l = byte(address)
 }
 
-func (reg *Register) ldhnA(value byte, mem Memory) {
+func (reg *Register) ldhnA(value byte, mem *Memory) {
 	mem.io[value] = reg.a
 }
 
-func (reg *Register) ldhAn(value byte, mem Memory) {
+func (reg *Register) ldhAn(value byte, mem *Memory) {
 	reg.a = mem.io[value]
 }
 
@@ -169,11 +169,11 @@ func (reg *Register) ldHLSPn(value byte) {
 	}
 }
 
-func (reg *Register) ldnnSP(value uint16, mem Memory) {
+func (reg *Register) ldnnSP(value uint16, mem *Memory) {
 	mem.writeWord(value, reg.sp)
 }
 
-func (reg *Register) pushnn(registers string, mem Memory) {
+func (reg *Register) pushnn(registers string, mem *Memory) {
 	var r1, r2 uint16
 	switch registers {
 	case "AF":
@@ -194,7 +194,7 @@ func (reg *Register) pushnn(registers string, mem Memory) {
 	reg.sp = reg.sp - 2
 }
 
-func (reg *Register) popnn(registers string, mem Memory) {
+func (reg *Register) popnn(registers string, mem *Memory) {
 	r1 := mem.readByte(reg.sp)
 	r2 := mem.readByte(reg.sp + 1)
 	switch registers {
@@ -501,31 +501,31 @@ func (reg *Register) swapn(register string) {
 	switch register {
 	case "A":
 		value := reg.a
-		value = ((value & 0xf) << 4) | ((value & 0xf0) >> 4)
+		value = ((value & 0x0F) << 4) | ((value & 0xF0) >> 4)
 		reg.a = value
 	case "B":
 		value := reg.b
-		value = ((value & 0xf) << 4) | ((value & 0xf0) >> 4)
+		value = ((value & 0x0F) << 4) | ((value & 0xF0) >> 4)
 		reg.b = value
 	case "C":
 		value := reg.c
-		value = ((value & 0xf) << 4) | ((value & 0xf0) >> 4)
+		value = ((value & 0x0F) << 4) | ((value & 0xF0) >> 4)
 		reg.c = value
 	case "D":
 		value := reg.d
-		value = ((value & 0xf) << 4) | ((value & 0xf0) >> 4)
+		value = ((value & 0x0F) << 4) | ((value & 0xF0) >> 4)
 		reg.d = value
 	case "E":
 		value := reg.e
-		value = ((value & 0xf) << 4) | ((value & 0xf0) >> 4)
+		value = ((value & 0x0F) << 4) | ((value & 0xF0) >> 4)
 		reg.e = value
 	case "H":
 		value := reg.h
-		value = ((value & 0xf) << 4) | ((value & 0xf0) >> 4)
+		value = ((value & 0x0F) << 4) | ((value & 0xF0) >> 4)
 		reg.h = value
 	case "L":
 		value := reg.l
-		value = ((value & 0xf) << 4) | ((value & 0xf0) >> 4)
+		value = ((value & 0x0F) << 4) | ((value & 0xF0) >> 4)
 		reg.l = value
 	}
 	// zero flag
