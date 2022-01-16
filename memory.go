@@ -21,8 +21,8 @@ func (mem Memory) readByte(address uint16) byte {
 	if address < 0x8000 {
 		return mem.rom[address]
 	} else if address >= 0x8000 && address < 0xA000 {
-		return vram[address-0x8000]
-	} else if mem.address >= 0xA000 && address < 0xC000 {
+		return mem.vram[address-0x8000]
+	} else if address >= 0xA000 && address < 0xC000 {
 		return mem.eram[address-0xA000]
 	} else if address > 0xC000 && address < 0xFE00 {
 		return mem.wram[address-0xC000]
@@ -30,8 +30,8 @@ func (mem Memory) readByte(address uint16) byte {
 		return mem.oam[address-0xFE00]
 	} else if address > 0xFF00 && address <= 0xFF80 {
 		return mem.io[address-0xFF00]
-	} else if address > 0xFF80 && adress <= 0xFFFF {
-		return mem.hram[adress-0xFF80]
+	} else if address > 0xFF80 && address <= 0xFFFF {
+		return mem.hram[address-0xFF80]
 	} else {
 		return 0
 	}
@@ -45,25 +45,25 @@ func (mem Memory) readWord(address uint16) uint16 {
 
 func (mem *Memory) writeByte(address uint16, value byte) {
 	if address < 0x8000 {
-		mem.rom[address]=value
+		mem.rom[address] = value
 	} else if address >= 0x8000 && address < 0xA000 {
-		vram[address-0x8000]=value
-	} else if mem.address >= 0xA000 && address < 0xC000 {
-		mem.eram[address-0xA000]=value
+		mem.vram[address-0x8000] = value
+	} else if address >= 0xA000 && address < 0xC000 {
+		mem.eram[address-0xA000] = value
 	} else if address > 0xC000 && address < 0xFE00 {
-		mem.wram[address-0xC000]=value
+		mem.wram[address-0xC000] = value
 	} else if address > 0xFE00 && address <= 0xFF00 {
-		mem.oam[address-0xFE00]=value
+		mem.oam[address-0xFE00] = value
 	} else if address > 0xFF00 && address <= 0xFF80 {
-		mem.io[address-0xFF00]=value
-	} else if address > 0xFF80 && adress <= 0xFFFF {
-		mem.hram[adress-0xFF80]=value
+		mem.io[address-0xFF00] = value
+	} else if address > 0xFF80 && address <= 0xFFFF {
+		mem.hram[address-0xFF80] = value
 	}
 }
 
-func (mem *Memory) writeWord(address uint16, value uint16) uint16 {
-	mem.writeByte(address, byte(value & 0x00FF))
-	mem.writeByte(adress+1, byte((value & 0xFF00) >> 8)))
+func (mem *Memory) writeWord(address uint16, value uint16) {
+	mem.writeByte(address, byte(value&0x00FF))
+	mem.writeByte(address+1, byte((value&0xFF00)>>8))
 }
 
 func (mem *Memory) loadRom(f string) {
