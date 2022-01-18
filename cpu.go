@@ -1062,3 +1062,73 @@ func (reg *Register) srln(destination string) {
 		reg.l = value
 	}
 }
+
+/* *************************************** */
+/* Bit opcodes                             */
+/* *************************************** */
+
+func (reg *Register) bitBr(destination string, pos uint16) {
+	var test bool
+	switch destination {
+	case "A":
+		test = hasBit(uint16(reg.a), pos)
+	case "B":
+		test = hasBit(uint16(reg.b), pos)
+	case "C":
+		test = hasBit(uint16(reg.c), pos)
+	case "D":
+		test = hasBit(uint16(reg.d), pos)
+	case "E":
+		test = hasBit(uint16(reg.e), pos)
+	case "H":
+		test = hasBit(uint16(reg.h), pos)
+	case "L":
+		test = hasBit(uint16(reg.l), pos)
+	}
+	// zero flag
+	reg.setRegisterFlag(test, 7)
+	// negative flag
+	reg.setRegisterFlag(false, 6)
+	// half carry flag
+	reg.setRegisterFlag(true, 5)
+}
+
+func (reg *Register) setBr(destination string, pos uint16) {
+	var mask byte = 1
+	switch destination {
+	case "A":
+		reg.a |= (mask << pos)
+	case "B":
+		reg.b |= (mask << pos)
+	case "C":
+		reg.c |= (mask << pos)
+	case "D":
+		reg.d |= (mask << pos)
+	case "E":
+		reg.e |= (mask << pos)
+	case "H":
+		reg.h |= (mask << pos)
+	case "L":
+		reg.l |= (mask << pos)
+	}
+}
+
+func (reg *Register) resBr(destination string, pos uint16) {
+	var mask byte = 1
+	switch destination {
+	case "A":
+		reg.a &^= (mask << pos)
+	case "B":
+		reg.b &^= (mask << pos)
+	case "C":
+		reg.c &^= (mask << pos)
+	case "D":
+		reg.d &^= (mask << pos)
+	case "E":
+		reg.e &^= (mask << pos)
+	case "H":
+		reg.h &^= (mask << pos)
+	case "L":
+		reg.l &^= (mask << pos)
+	}
+}
