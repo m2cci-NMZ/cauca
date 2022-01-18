@@ -1132,3 +1132,62 @@ func (reg *Register) resBr(destination string, pos uint16) {
 		reg.l &^= (mask << pos)
 	}
 }
+
+/* *************************************** */
+/* Jumps                                   */
+/* *************************************** */
+
+func (reg *Register) jpnn(destination uint16) {
+	reg.pc = destination
+}
+
+func (reg *Register) jpccnn(destination uint16, condition string) {
+	switch condition {
+	case "NZ":
+		if !hasBit(uint16(reg.flags), 7) {
+			reg.pc = destination
+		}
+	case "Z":
+		if hasBit(uint16(reg.flags), 7) {
+			reg.pc = destination
+		}
+	case "NC":
+		if !hasBit(uint16(reg.flags), 4) {
+			reg.pc = destination
+		}
+	case "C":
+		if hasBit(uint16(reg.flags), 4) {
+			reg.pc = destination
+		}
+	}
+}
+
+func (reg *Register) jpHL() {
+	HL := (uint16(reg.h) << 8) + uint16(reg.l)
+	reg.pc = HL
+}
+
+func (reg *Register) jrn(n uint16) {
+	reg.pc += n
+}
+
+func (reg *Register) jrccn(n uint16, condition string) {
+	switch condition {
+	case "NZ":
+		if !hasBit(uint16(reg.flags), 7) {
+			reg.pc += n
+		}
+	case "Z":
+		if hasBit(uint16(reg.flags), 7) {
+			reg.pc += n
+		}
+	case "NC":
+		if !hasBit(uint16(reg.flags), 4) {
+			reg.pc += n
+		}
+	case "C":
+		if hasBit(uint16(reg.flags), 4) {
+			reg.pc += n
+		}
+	}
+}
