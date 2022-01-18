@@ -1,6 +1,6 @@
 package main
 
-import "bits"
+import "maths/bits"
 
 type Register struct {
 	a     byte
@@ -541,19 +541,21 @@ func (reg *Register) swapn(register string) {
 }
 
 func (reg *Register) dAA() {
+	var value uint16
+	value = uint16(reg.a)
 	if hasBit(uint16(reg.flags), 6) {
 		if hasBit(uint16(reg.flags), 5) {
-			reg.a = (reg.a - 0x06) & 0xFF
+			value = (value - 0x06) & 0xFF
 		}
 		if hasBit(uint16(reg.flags), 4) {
-			reg.a -= 0x60
+			value -= 0x60
 		}
 	} else {
-		if hasBit(uint16(reg.flags), 5) || ((uint16(reg.a) & 0xF) > 9) {
-			reg.a += 0x06
+		if hasBit(uint16(reg.flags), 5) || ((value & 0xF) > 9) {
+			value += 0x06
 		}
-		if hasBit(uint16(reg.flags), 4) || reg.a > 0x9F {
-			reg.a += 0x60
+		if hasBit(uint16(reg.flags), 4) || value > 0x9F {
+			value += 0x60
 		}
 	}
 	// half carry flag
@@ -565,9 +567,10 @@ func (reg *Register) dAA() {
 		reg.setRegisterFlag(true, 7)
 	}
 	// carry flag
-	if reg.a >= 0x100 {
+	if value >= 0x100 {
 		reg.setRegisterFlag(true, 4)
 	}
+	reg.a = byte(value)
 }
 
 func (reg *Register) cpl() {
@@ -603,8 +606,13 @@ func (reg *Register) scf() {
 /* rotates and shifts                      */
 /* *************************************** */
 
+// this is VERY tricky, maybe worth writing unit tests
 func (reg *Register) rlcA() {
 	value := bits.RotateLeft16(reg.a, 1)
+	if hasBit(uint16(reg.flags), 4) {
+		var pos uint16 = 1
+		value |= pos
+	}
 	//zero flag
 	if value {
 		reg.setRegisterFlag(false, 7)
@@ -621,11 +629,11 @@ func (reg *Register) rlcA() {
 	} else {
 		reg.setRegisterFlag(false, 4)
 	}
-	reg.a = value
+	reg.a = byte(value)
 }
 
 func (reg *Register) rlA() {
-	value := bits.RotateLeft16(reg.a, 1)
+	value := bits.RotateLeft8(reg.a, 1)
 	//zero flag
 	if value {
 		reg.setRegisterFlag(false, 7)
@@ -641,6 +649,10 @@ func (reg *Register) rlA() {
 
 func (reg *Register) rrcA() {
 	value := bits.RotateRight16(reg.a, 1)
+	if hasBit(uint16(reg.flags), 4) {
+		var pos uint16 = 1
+		value |= (pos << 7)
+	}
 	//zero flag
 	if value {
 		reg.setRegisterFlag(false, 7)
@@ -657,11 +669,11 @@ func (reg *Register) rrcA() {
 	} else {
 		reg.setRegisterFlag(false, 4)
 	}
-	reg.a = value
+	reg.a = byte(value)
 }
 
 func (reg *Register) rrA() {
-	value := bits.RotateRight16(reg.a, 1)
+	value := bits.RotateRight8(reg.a, 1)
 	//zero flag
 	if value {
 		reg.setRegisterFlag(false, 7)
@@ -673,4 +685,380 @@ func (reg *Register) rrA() {
 	// half carry flag
 	reg.setRegisterFlag(false, 5)
 	reg.a = value
+}
+
+func (reg *Register) rlcn(destination string) {
+	var register byte
+	switch destination {
+	case "A":
+		register = reg.a
+	case "B":
+		register = reg.b
+	case "C":
+		register = reg.c
+	case "D":
+		register = reg.d
+	case "E":
+		register = reg.e
+	case "H":
+		register = reg.h
+	case "L":
+		register = reg.l
+	}
+	value := bits.RotateLeft16(register, 1)
+	if hasBit(uint16(reg.flags), 4) {
+		var pos uint16 = 1
+		value |= (pos << 7)
+	}
+	//zero flag
+	if value {
+		reg.setRegisterFlag(false, 7)
+	} else {
+		reg.setRegisterFlag(true, 7)
+	}
+	// negative flag
+	reg.setRegisterFlag(false, 6)
+	// half carry flag
+	reg.setRegisterFlag(false, 5)
+	//carry flag
+	if register != 0 {
+		reg.setRegisterFlag(true, 4)
+	} else {
+		reg.setRegisterFlag(false, 4)
+	}
+	switch destination {
+	case "A":
+		reg.a = byte(value)
+	case "B":
+		reg.b = byte(value)
+	case "C":
+		reg.c = byte(value)
+	case "D":
+		reg.d = byte(value)
+	case "E":
+		reg.e = byte(value)
+	case "H":
+		reg.h = byte(value)
+	case "L":
+		reg.l = byte(value)
+	}
+}
+
+func (reg *Register) rln(destination string) {
+	var register byte
+	switch destination {
+	case "A":
+		register = reg.a
+	case "B":
+		register = reg.b
+	case "C":
+		register = reg.c
+	case "D":
+		register = reg.d
+	case "E":
+		register = reg.e
+	case "H":
+		register = reg.h
+	case "L":
+		register = reg.l
+	}
+	value := bits.RotateLeft8(register, 1)
+	//zero flag
+	if value {
+		reg.setRegisterFlag(false, 7)
+	} else {
+		reg.setRegisterFlag(true, 7)
+	}
+	// negative flag
+	reg.setRegisterFlag(false, 6)
+	// half carry flag
+	reg.setRegisterFlag(false, 5)
+	switch destination {
+	case "A":
+		reg.a = value
+	case "B":
+		reg.b = value
+	case "C":
+		reg.c = value
+	case "D":
+		reg.d = value
+	case "E":
+		reg.e = value
+	case "H":
+		reg.h = value
+	case "L":
+		reg.l = value
+	}
+}
+
+func (reg *Register) rrcn(destination string) {
+	var register byte
+	switch destination {
+	case "A":
+		register = reg.a
+	case "B":
+		register = reg.b
+	case "C":
+		register = reg.c
+	case "D":
+		register = reg.d
+	case "E":
+		register = reg.e
+	case "H":
+		register = reg.h
+	case "L":
+		register = reg.l
+	}
+	value := bits.RotateRight16(register, 1)
+	if hasBit(uint16(reg.flags), 4) {
+		var pos uint16 = 1
+		value |= pos
+	}
+	//zero flag
+	if value {
+		reg.setRegisterFlag(false, 7)
+	} else {
+		reg.setRegisterFlag(true, 7)
+	}
+	// negative flag
+	reg.setRegisterFlag(false, 6)
+	// half carry flag
+	reg.setRegisterFlag(false, 5)
+	//carry flag
+	if (register & 0x80) != 0 {
+		reg.setRegisterFlag(true, 4)
+	} else {
+		reg.setRegisterFlag(false, 4)
+	}
+	switch destination {
+	case "A":
+		reg.a = byte(value)
+	case "B":
+		reg.b = byte(value)
+	case "C":
+		reg.c = byte(value)
+	case "D":
+		reg.d = byte(value)
+	case "E":
+		reg.e = byte(value)
+	case "H":
+		reg.h = byte(value)
+	case "L":
+		reg.l = byte(value)
+	}
+}
+func (reg *Register) rrn(destination string) {
+	var register byte
+	switch destination {
+	case "A":
+		register = reg.a
+	case "B":
+		register = reg.b
+	case "C":
+		register = reg.c
+	case "D":
+		register = reg.d
+	case "E":
+		register = reg.e
+	case "H":
+		register = reg.h
+	case "L":
+		register = reg.l
+	}
+	value := bits.RotateRight8(register, 1)
+	//zero flag
+	if value {
+		reg.setRegisterFlag(false, 7)
+	} else {
+		reg.setRegisterFlag(true, 7)
+	}
+	// negative flag
+	reg.setRegisterFlag(false, 6)
+	// half carry flag
+	reg.setRegisterFlag(false, 5)
+	//carry flag
+	if (register & 0x80) != 0 {
+		reg.setRegisterFlag(true, 4)
+	} else {
+		reg.setRegisterFlag(false, 4)
+	}
+	switch destination {
+	case "A":
+		reg.a = value
+	case "B":
+		reg.b = value
+	case "C":
+		reg.c = value
+	case "D":
+		reg.d = value
+	case "E":
+		reg.e = value
+	case "H":
+		reg.h = value
+	case "L":
+		reg.l = value
+	}
+}
+
+func (reg *Register) slan(destination string) {
+	var register byte
+	switch destination {
+	case "A":
+		register = reg.a
+	case "B":
+		register = reg.b
+	case "C":
+		register = reg.c
+	case "D":
+		register = reg.d
+	case "E":
+		register = reg.e
+	case "H":
+		register = reg.h
+	case "L":
+		register = reg.l
+	}
+	value := register << 1
+	var mask byte = 1
+	value &^= mask
+	//zero flag
+	if value != 0 {
+		reg.setRegisterFlag(false, 7)
+	} else {
+		reg.setRegisterFlag(true, 7)
+	}
+	// negative flag
+	reg.setRegisterFlag(false, 6)
+	// half carry flag
+	reg.setRegisterFlag(false, 5)
+	//carry flag
+	if register != 0 {
+		reg.setRegisterFlag(true, 4)
+	} else {
+		reg.setRegisterFlag(false, 4)
+	}
+	switch destination {
+	case "A":
+		reg.a = value
+	case "B":
+		reg.b = value
+	case "C":
+		reg.c = value
+	case "D":
+		reg.d = value
+	case "E":
+		reg.e = value
+	case "H":
+		reg.h = value
+	case "L":
+		reg.l = value
+	}
+}
+
+func (reg *Register) sran(destination string) {
+	var register byte
+	switch destination {
+	case "A":
+		register = reg.a
+	case "B":
+		register = reg.b
+	case "C":
+		register = reg.c
+	case "D":
+		register = reg.d
+	case "E":
+		register = reg.e
+	case "H":
+		register = reg.h
+	case "L":
+		register = reg.l
+	}
+	value := register >> 1
+	//zero flag
+	if value != 0 {
+		reg.setRegisterFlag(false, 7)
+	} else {
+		reg.setRegisterFlag(true, 7)
+	}
+	// negative flag
+	reg.setRegisterFlag(false, 6)
+	// half carry flag
+	reg.setRegisterFlag(false, 5)
+	//carry flag
+	if register != 0 {
+		reg.setRegisterFlag(true, 4)
+	} else {
+		reg.setRegisterFlag(false, 4)
+	}
+	switch destination {
+	case "A":
+		reg.a = value
+	case "B":
+		reg.b = value
+	case "C":
+		reg.c = value
+	case "D":
+		reg.d = value
+	case "E":
+		reg.e = value
+	case "H":
+		reg.h = value
+	case "L":
+		reg.l = value
+	}
+}
+
+func (reg *Register) srln(destination string) {
+	var register byte
+	switch destination {
+	case "A":
+		register = reg.a
+	case "B":
+		register = reg.b
+	case "C":
+		register = reg.c
+	case "D":
+		register = reg.d
+	case "E":
+		register = reg.e
+	case "H":
+		register = reg.h
+	case "L":
+		register = reg.l
+	}
+	value := register >> 1
+	var mask byte = 1
+	value &^= (mask << 7)
+	//zero flag
+	if value != 0 {
+		reg.setRegisterFlag(false, 7)
+	} else {
+		reg.setRegisterFlag(true, 7)
+	}
+	// negative flag
+	reg.setRegisterFlag(false, 6)
+	// half carry flag
+	reg.setRegisterFlag(false, 5)
+	//carry flag
+	if register != 0 {
+		reg.setRegisterFlag(true, 4)
+	} else {
+		reg.setRegisterFlag(false, 4)
+	}
+	switch destination {
+	case "A":
+		reg.a = value
+	case "B":
+		reg.b = value
+	case "C":
+		reg.c = value
+	case "D":
+		reg.d = value
+	case "E":
+		reg.e = value
+	case "H":
+		reg.h = value
+	case "L":
+		reg.l = value
+	}
 }
