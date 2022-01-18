@@ -1191,3 +1191,36 @@ func (reg *Register) jrccn(n uint16, condition string) {
 		}
 	}
 }
+
+/* *************************************** */
+/* Calls                                   */
+/* *************************************** */
+
+func (reg *Register) callnn(destination uint16, mem *Memory) {
+	mem.writeWord(reg.sp, reg.pc+1)
+	reg.sp++
+	reg.pc = destination
+}
+
+func (reg *Register) callccnn(n uint16, condition string, mem *Memory) {
+	switch condition {
+	case "NZ":
+		if !hasBit(uint16(reg.flags), 7) {
+			mem.writeWord(reg.sp, reg.pc+1)
+			reg.sp++
+			reg.pc = n
+		}
+	case "Z":
+		if hasBit(uint16(reg.flags), 7) {
+			reg.pc += n
+		}
+	case "NC":
+		if !hasBit(uint16(reg.flags), 4) {
+			reg.pc += n
+		}
+	case "C":
+		if hasBit(uint16(reg.flags), 4) {
+			reg.pc += n
+		}
+	}
+}
