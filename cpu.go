@@ -1,7 +1,5 @@
 package main
 
-import "maths/bits"
-
 type Register struct {
 	a     byte
 	b     byte
@@ -608,13 +606,13 @@ func (reg *Register) scf() {
 
 // this is VERY tricky, maybe worth writing unit tests
 func (reg *Register) rlcA() {
-	value := bits.RotateLeft16(reg.a, 1)
+	value := uint16(reg.a) << 1
 	if hasBit(uint16(reg.flags), 4) {
-		var pos uint16 = 1
+		var pos uint16 = 7
 		value |= pos
 	}
 	//zero flag
-	if value {
+	if value != 0 {
 		reg.setRegisterFlag(false, 7)
 	} else {
 		reg.setRegisterFlag(true, 7)
@@ -633,9 +631,9 @@ func (reg *Register) rlcA() {
 }
 
 func (reg *Register) rlA() {
-	value := bits.RotateLeft8(reg.a, 1)
+	value := uint16(reg.a) << 1
 	//zero flag
-	if value {
+	if value != 0 {
 		reg.setRegisterFlag(false, 7)
 	} else {
 		reg.setRegisterFlag(true, 7)
@@ -644,17 +642,23 @@ func (reg *Register) rlA() {
 	reg.setRegisterFlag(false, 6)
 	// half carry flag
 	reg.setRegisterFlag(false, 5)
-	reg.a = value
+	reg.a = byte(value)
+	//carry flag
+	if (reg.a & 0x80) != 0 {
+		reg.setRegisterFlag(true, 4)
+	} else {
+		reg.setRegisterFlag(false, 4)
+	}
 }
 
 func (reg *Register) rrcA() {
-	value := bits.RotateRight16(reg.a, 1)
+	value := uint16(reg.a) >> 1
 	if hasBit(uint16(reg.flags), 4) {
 		var pos uint16 = 1
-		value |= (pos << 7)
+		value |= pos
 	}
 	//zero flag
-	if value {
+	if value != 0 {
 		reg.setRegisterFlag(false, 7)
 	} else {
 		reg.setRegisterFlag(true, 7)
@@ -673,9 +677,9 @@ func (reg *Register) rrcA() {
 }
 
 func (reg *Register) rrA() {
-	value := bits.RotateRight8(reg.a, 1)
+	value := uint16(reg.a) >> 1
 	//zero flag
-	if value {
+	if value != 0 {
 		reg.setRegisterFlag(false, 7)
 	} else {
 		reg.setRegisterFlag(true, 7)
@@ -684,7 +688,7 @@ func (reg *Register) rrA() {
 	reg.setRegisterFlag(false, 6)
 	// half carry flag
 	reg.setRegisterFlag(false, 5)
-	reg.a = value
+	reg.a = byte(value)
 }
 
 func (reg *Register) rlcn(destination string) {
@@ -705,13 +709,13 @@ func (reg *Register) rlcn(destination string) {
 	case "L":
 		register = reg.l
 	}
-	value := bits.RotateLeft16(register, 1)
+	value := uint16(register) >> 1
 	if hasBit(uint16(reg.flags), 4) {
 		var pos uint16 = 1
 		value |= (pos << 7)
 	}
 	//zero flag
-	if value {
+	if value != 0 {
 		reg.setRegisterFlag(false, 7)
 	} else {
 		reg.setRegisterFlag(true, 7)
@@ -762,9 +766,9 @@ func (reg *Register) rln(destination string) {
 	case "L":
 		register = reg.l
 	}
-	value := bits.RotateLeft8(register, 1)
+	value := uint16(register) << 1
 	//zero flag
-	if value {
+	if value != 0 {
 		reg.setRegisterFlag(false, 7)
 	} else {
 		reg.setRegisterFlag(true, 7)
@@ -775,19 +779,19 @@ func (reg *Register) rln(destination string) {
 	reg.setRegisterFlag(false, 5)
 	switch destination {
 	case "A":
-		reg.a = value
+		reg.a = byte(value)
 	case "B":
-		reg.b = value
+		reg.b = byte(value)
 	case "C":
-		reg.c = value
+		reg.c = byte(value)
 	case "D":
-		reg.d = value
+		reg.d = byte(value)
 	case "E":
-		reg.e = value
+		reg.e = byte(value)
 	case "H":
-		reg.h = value
+		reg.h = byte(value)
 	case "L":
-		reg.l = value
+		reg.l = byte(value)
 	}
 }
 
@@ -809,13 +813,13 @@ func (reg *Register) rrcn(destination string) {
 	case "L":
 		register = reg.l
 	}
-	value := bits.RotateRight16(register, 1)
+	value := uint16(register) >> 1
 	if hasBit(uint16(reg.flags), 4) {
 		var pos uint16 = 1
 		value |= pos
 	}
 	//zero flag
-	if value {
+	if value != 0 {
 		reg.setRegisterFlag(false, 7)
 	} else {
 		reg.setRegisterFlag(true, 7)
@@ -865,9 +869,9 @@ func (reg *Register) rrn(destination string) {
 	case "L":
 		register = reg.l
 	}
-	value := bits.RotateRight8(register, 1)
+	value := uint16(register) >> 1
 	//zero flag
-	if value {
+	if value != 0 {
 		reg.setRegisterFlag(false, 7)
 	} else {
 		reg.setRegisterFlag(true, 7)
@@ -884,19 +888,19 @@ func (reg *Register) rrn(destination string) {
 	}
 	switch destination {
 	case "A":
-		reg.a = value
+		reg.a = byte(value)
 	case "B":
-		reg.b = value
+		reg.b = byte(value)
 	case "C":
-		reg.c = value
+		reg.c = byte(value)
 	case "D":
-		reg.d = value
+		reg.d = byte(value)
 	case "E":
-		reg.e = value
+		reg.e = byte(value)
 	case "H":
-		reg.h = value
+		reg.h = byte(value)
 	case "L":
-		reg.l = value
+		reg.l = byte(value)
 	}
 }
 
@@ -1212,14 +1216,20 @@ func (reg *Register) callccnn(n uint16, condition string, mem *Memory) {
 		}
 	case "Z":
 		if hasBit(uint16(reg.flags), 7) {
+			mem.writeWord(reg.sp, reg.pc+1)
+			reg.sp++
 			reg.pc += n
 		}
 	case "NC":
 		if !hasBit(uint16(reg.flags), 4) {
+			mem.writeWord(reg.sp, reg.pc+1)
+			reg.sp++
 			reg.pc += n
 		}
 	case "C":
 		if hasBit(uint16(reg.flags), 4) {
+			mem.writeWord(reg.sp, reg.pc+1)
+			reg.sp++
 			reg.pc += n
 		}
 	}
