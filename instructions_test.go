@@ -158,3 +158,84 @@ func TestLdhAn(t *testing.T) {
 		t.Errorf("%d value in memory address 0xFF01, expected register A", reg.l)
 	}
 }
+
+func TestLdnnn16(t *testing.T) {
+	var reg Register
+	var value uint16 = 0x0102
+	reg.ldnnn16(value, "BC")
+	if reg.b != 1 {
+		t.Errorf("%d value in register B, expected 1", reg.b)
+	}
+	if reg.c != 2 {
+		t.Errorf("%d value in register C, expected 2", reg.b)
+	}
+}
+
+func TestLdSPHL(t *testing.T) {
+	var reg Register
+	reg.h = 1
+	reg.l = 2
+	var value uint16 = 0x0102
+	reg.ldSPHL()
+	if reg.sp != value {
+		t.Errorf("%d value in register sp, expected %d", reg.b, value)
+	}
+}
+
+func TestLdHLSPn(t *testing.T) {
+	var reg Register
+	reg.sp = 0x0102
+	reg.ldHLSPn(1)
+	if reg.h != 1 {
+		t.Errorf("%d in register h, expected 1", reg.h)
+	}
+	if reg.l != 3 {
+		t.Errorf("%d in register l, expected 3", reg.l)
+	}
+}
+
+func TestLdnnSP(t *testing.T) {
+	var reg Register
+	var mem Memory
+	reg.sp = 10
+	reg.ldnnSP(10, &mem)
+	if mem.readWord(10) != reg.sp {
+		t.Errorf("%d at memory address 10, expected %d (sp)", mem.readWord(10), reg.sp)
+	}
+}
+
+func TestPushnn(t *testing.T) {
+	var reg Register
+	var mem Memory
+	reg.b = 1
+	reg.c = 1
+	reg.sp = 10
+	reg.pushnn("BC", &mem)
+	if mem.readWord(10) != 1 {
+		t.Errorf("%d at memory address 10, expected %d", mem.readWord(10), reg.b)
+	}
+	if mem.readWord(11) != 1 {
+		t.Errorf("%d at memory address 11, expected %d", mem.readWord(11), reg.c)
+	}
+	if reg.sp != 8 {
+		t.Errorf("%d in sp, expected 12", reg.sp)
+	}
+}
+
+func TestPopnn(t *testing.T) {
+	var reg Register
+	var mem Memory
+	reg.sp = 10
+	mem.rom[10] = 1
+	mem.rom[11] = 1
+	reg.popnn("BC", &mem)
+	if reg.b != 1 {
+		t.Errorf("%d at register B, expected %d", reg.b, mem.readWord(10))
+	}
+	if mem.readWord(11) != 1 {
+		t.Errorf("%d at register C, expected %d", reg.c, mem.readWord(11))
+	}
+	if reg.sp != 12 {
+		t.Errorf("%d in sp, expected 12", reg.sp)
+	}
+}
