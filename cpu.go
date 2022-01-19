@@ -64,8 +64,40 @@ func (reg *Register) ldr1r2(destination string, source string) {
 	*(reg_map[destination]) = *(reg_map[source])
 }
 
-func (reg *Register) ldAn(value byte) {
-	reg.a = value
+func (reg *Register) ldAn(source string) {
+	switch source {
+	case "A":
+	case "B":
+		reg.a = reg.b
+	case "C":
+		reg.a = reg.c
+	case "D":
+		reg.a = reg.d
+	case "E":
+		reg.a = reg.e
+	case "H":
+		reg.a = reg.h
+	case "L":
+		reg.a = reg.l
+	}
+}
+
+func (reg *Register) ldnA(source string) {
+	switch source {
+	case "A":
+	case "B":
+		reg.b = reg.a
+	case "C":
+		reg.c = reg.a
+	case "D":
+		reg.d = reg.a
+	case "E":
+		reg.e = reg.a
+	case "H":
+		reg.h = reg.h
+	case "L":
+		reg.l = reg.l
+	}
 }
 
 func (reg *Register) ldAC(mem *Memory) {
@@ -102,7 +134,7 @@ func (reg *Register) ldiAHL(mem *Memory) {
 
 func (reg *Register) ldiHLA(mem *Memory) {
 	address := (uint16(reg.h) << 8) + uint16(reg.l)
-	mem.io[address] = reg.a
+	mem.writeByte(address, reg.a)
 	address++
 	reg.h = byte(address >> 8)
 	reg.l = byte(address)
