@@ -303,7 +303,7 @@ func (reg *Register) subn(value byte) {
 
 func (reg *Register) sbcAn(value byte) {
 	if hasBit(uint16(reg.flags), 4) {
-		value++
+		value--
 	}
 	reg.subn(value)
 }
@@ -395,22 +395,28 @@ func (reg *Register) incn(register string) {
 }
 
 func (reg *Register) decn(register string) {
-	var result uint16
-	result--
+	var result int16
 	switch register {
 	case "A":
+		result = int16(reg.a) - 1
 		reg.a = byte(result)
 	case "B":
+		result = int16(reg.a) - 1
 		reg.b = byte(result)
 	case "C":
+		result = int16(reg.a) - 1
 		reg.c = byte(result)
 	case "D":
+		result = int16(reg.a) - 1
 		reg.d = byte(result)
 	case "E":
+		result = int16(reg.a) - 1
 		reg.e = byte(result)
 	case "H":
+		result = int16(reg.a) - 1
 		reg.h = byte(result)
 	case "L":
+		result = int16(reg.a) - 1
 		reg.l = byte(result)
 	}
 	// negative flag
@@ -424,13 +430,13 @@ func (reg *Register) decn(register string) {
 		reg.setRegisterFlag(true, 7)
 	}
 	// half carry flag
-	if (uint16(reg.a&0x0F) + result&0x000F) > 0x0F {
+	if (int16(reg.a&0x0f) + result&0x000f) > 0x0f {
 		reg.setRegisterFlag(true, 5)
 	} else {
 		reg.setRegisterFlag(false, 5)
 	}
 	// carry flag
-	if (result & 0xFF00) != 0 {
+	if (int32(result) & 0xff00) != 0 {
 		reg.setRegisterFlag(true, 4)
 	} else {
 		reg.setRegisterFlag(false, 4)
