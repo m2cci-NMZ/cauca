@@ -341,3 +341,50 @@ func TestDecn(t *testing.T) {
 		t.Errorf("%d in register A, expected 0", reg.a)
 	}
 }
+
+func TestAddHLn(t *testing.T) {
+	var reg Register
+	var value uint16 = 0x0102
+	reg.addHLn(value)
+	if reg.h != 1 {
+		t.Errorf("%d in register H, expected 1", reg.h)
+	}
+	if reg.l != 2 {
+		t.Errorf("%d in register L, expected 2", reg.l)
+	}
+}
+
+func TestAddSPn(t *testing.T) {
+	var reg Register
+	var value uint16 = 0x0102
+	reg.addSPn(value)
+	if reg.sp != value {
+		t.Errorf("%d in stack pointer, expected %d", reg.sp, value)
+	}
+}
+
+func TestIncnn(t *testing.T) {
+	var reg Register
+	reg.b = 1
+	reg.c = 1
+	reg.incnn("BC")
+	if reg.b != 1 {
+		t.Errorf("%d in register b, expected 1", reg.b)
+	}
+	if reg.c != 2 {
+		t.Errorf("%d in register c, expected 2", reg.c)
+	}
+}
+
+func TestDecnn(t *testing.T) {
+	var reg Register
+	reg.b = 1
+	reg.c = 1
+	reg.decnn("BC")
+	if reg.b != 1 {
+		t.Errorf("%d in register b, expected 1", reg.b)
+	}
+	if reg.c != 0 {
+		t.Errorf("%d in register c, expected 0", reg.c)
+	}
+}

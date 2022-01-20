@@ -447,10 +447,10 @@ func (reg *Register) decn(register string) {
 /* 16 bit ALU                               */
 /* *************************************** */
 
-func (reg *Register) addHLn(value int16) {
-	var result int32
-	HL := int16(reg.h)<<8 + int16(reg.l)
-	result = int32(HL) + int32(value)
+func (reg *Register) addHLn(value uint16) {
+	var result uint32
+	HL := uint16(reg.h)<<8 + uint16(reg.l)
+	result = uint32(HL) + uint32(value)
 	// negative flag
 	reg.setRegisterFlag(false, 6)
 	// carry flag
@@ -460,17 +460,17 @@ func (reg *Register) addHLn(value int16) {
 		reg.setRegisterFlag(false, 4)
 	}
 	// half carry flag
-	if ((int16(result) & 0x0F) + (value & 0x0F)) > 0x0F {
+	if ((uint16(result) & 0x0F) + (value & 0x0F)) > 0x0F {
 		reg.setRegisterFlag(true, 5)
 	} else {
 		reg.setRegisterFlag(false, 5)
 	}
-	reg.h = byte(result << 8)
+	reg.h = byte(result >> 8)
 	reg.l = byte(result)
 }
 
-func (reg *Register) addSPn(value int16) {
-	result := int32(reg.sp) + int32(value)
+func (reg *Register) addSPn(value uint16) {
+	result := uint32(reg.sp) + uint32(value)
 	// zero flag
 	reg.setRegisterFlag(false, 7)
 	// negative flag
@@ -482,7 +482,7 @@ func (reg *Register) addSPn(value int16) {
 		reg.setRegisterFlag(false, 4)
 	}
 	// half carry flag
-	if ((int16(result) & 0x0F) + (value & 0x0F)) > 0x0F {
+	if ((uint16(result) & 0x0F) + (value & 0x0F)) > 0x0F {
 		reg.setRegisterFlag(true, 5)
 	} else {
 		reg.setRegisterFlag(false, 5)
