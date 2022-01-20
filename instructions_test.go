@@ -239,3 +239,105 @@ func TestPopnn(t *testing.T) {
 		t.Errorf("%d in sp, expected 12", reg.sp)
 	}
 }
+
+func TestAddAn(t *testing.T) {
+	var value byte = 1
+	var reg Register
+	reg.addAn(value)
+	if reg.a != value {
+		t.Errorf("%d in register a, expected %d", reg.a, value)
+	}
+}
+
+func TestAddcAn(t *testing.T) {
+	var value byte = 1
+	var reg Register
+	reg.flags = 1 << 4
+	reg.addcAn(value)
+	if reg.a != (value + 1) {
+		t.Errorf("%d in register a, expected %d", reg.a, value+1)
+	}
+}
+
+func TestSubn(t *testing.T) {
+	var value byte = 1
+	var reg Register
+	reg.a = 1
+	reg.subn(value)
+	if reg.a != 0 {
+		t.Errorf("%d in register a, expected 0", reg.a)
+	}
+}
+
+func TestSbcAn(t *testing.T) {
+	var value byte = 1
+	var reg Register
+	reg.flags = 1 << 4
+	reg.a = 1
+	reg.sbcAn(value)
+	if reg.a != 1 {
+		t.Errorf("%d in register A, expected 1", reg.a)
+	}
+}
+
+func TestAndn(t *testing.T) {
+	var value byte = 0
+	var reg Register
+	reg.a = 1
+	reg.andn(value)
+	if reg.a != 0 {
+		t.Errorf("%d in register A, expected 0", reg.a)
+	}
+}
+
+func TestOrn(t *testing.T) {
+	var value byte = 0
+	var reg Register
+	reg.a = 1
+	reg.orn(value)
+	if reg.a != 1 {
+		t.Errorf("%d in register A, expected 1", reg.a)
+	}
+}
+
+func TestXorn(t *testing.T) {
+	var value byte = 1
+	var reg Register
+	reg.a = 1
+	reg.xorn(value)
+	if reg.a != 0 {
+		t.Errorf("%d in register A, expected 1", reg.a)
+	}
+}
+
+func TestCpn(t *testing.T) {
+	var value byte = 1
+	var reg Register
+	reg.a = 1
+	reg.cpn(value)
+	if !hasBit(uint16(reg.flags), 7) {
+		t.Errorf("expected zero flag to be 1, is 0")
+	}
+	value++
+	reg.cpn(value)
+	if !hasBit(uint16(reg.flags), 4) {
+		t.Errorf("expected carry flag to be 1, is 0")
+	}
+}
+
+func TestIncn(t *testing.T) {
+	var reg Register
+	reg.incn("A")
+	if reg.a != 1 {
+		t.Errorf("%d in register A, expected 1", reg.a)
+	}
+}
+
+func TestDecn(t *testing.T) {
+	var reg Register
+	reg.a = 1
+	reg.decn("A")
+	if reg.a != 0 {
+		t.Errorf("%d in register A, expected 0", reg.a)
+	}
+}
