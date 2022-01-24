@@ -32,10 +32,12 @@ func TestLdAn(t *testing.T) {
 
 func TestLdnA(t *testing.T) {
 	var reg Register
+	var mem Memory
 	reg.a = 10
-	reg.ldAn("C")
-	if reg.c != reg.a {
-		t.Errorf("%d for register C, expected %d", reg.c, reg.a)
+	reg.c = 20
+	reg.ldnA("C", &mem)
+	if mem.readByte(20) != reg.a {
+		t.Errorf("%d for memory at adress 20, expected %d", mem.readByte(20), reg.a)
 	}
 }
 func TestLdAC(t *testing.T) {
@@ -386,5 +388,17 @@ func TestDecnn(t *testing.T) {
 	}
 	if reg.c != 0 {
 		t.Errorf("%d in register c, expected 0", reg.c)
+	}
+}
+
+func TestRlcA(t *testing.T) {
+	var reg Register
+	reg.a = 129
+	reg.rlcA()
+	if reg.a != 2 {
+		t.Errorf("%d in register A, expected 2", reg.a)
+	}
+	if hasBit(uint16(reg.flags), 4) {
+		t.Errorf("bit 7 of register A was not carried")
 	}
 }

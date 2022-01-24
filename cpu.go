@@ -1,5 +1,7 @@
 package main
 
+import "strconv"
+
 type Register struct {
 	a     byte
 	b     byte
@@ -11,6 +13,11 @@ type Register struct {
 	flags byte
 	sp    uint16
 	pc    uint16
+}
+
+func concatenateBytes(a byte, b byte) uint16 {
+	result := (uint16(a) << 8) + uint16(b)
+	return result
 }
 
 /* *************************************** */
@@ -82,21 +89,31 @@ func (reg *Register) ldAn(source string) {
 	}
 }
 
-func (reg *Register) ldnA(source string) {
+func (reg *Register) ldnA(source string, mem *Memory) {
 	switch source {
 	case "A":
+		mem.writeByte(uint16(reg.a), reg.a)
 	case "B":
-		reg.b = reg.a
+		mem.writeByte(uint16(reg.b), reg.a)
 	case "C":
-		reg.c = reg.a
+		mem.writeByte(uint16(reg.c), reg.a)
 	case "D":
-		reg.d = reg.a
+		mem.writeByte(uint16(reg.d), reg.a)
 	case "E":
-		reg.e = reg.a
+		mem.writeByte(uint16(reg.e), reg.a)
 	case "H":
-		reg.h = reg.h
+		mem.writeByte(uint16(reg.h), reg.a)
 	case "L":
-		reg.l = reg.l
+		mem.writeByte(uint16(reg.l), reg.a)
+	case "BC":
+		mem.writeByte(concatenateBytes(reg.b, reg.c), reg.a)
+	case "DE":
+		mem.writeByte(concatenateBytes(reg.d, reg.e), reg.a)
+	case "HL":
+		mem.writeByte(concatenateBytes(reg.h, reg.l), reg.a)
+	default:
+		address, _ := strconv.ParseInt(source, 16, 16)
+		mem.writeByte(uint16(address), reg.a)
 	}
 }
 
@@ -1270,5 +1287,34 @@ func (reg *Register) callccnn(n uint16, condition string, mem *Memory) {
 			reg.sp++
 			reg.pc += n
 		}
+	}
+}
+
+func (reg *Register) execute(opcode byte, mem *Memory) {
+	switch opcode {
+	case 0x00:
+	case 0x01:
+		reg.ldnnn16(mem.readWord(reg.pc), "BC")
+	case 0x02:
+		reg.ldnA("BC", mem)
+	case 0x03:
+		reg.incnn("BC")
+	case 0x04:
+		reg.incn("B")
+	case 0x05:
+		reg.decn("B")
+	case 0x06:
+		value := mem.readByte(reg.pc)
+		reg.ldnnn(value, "B")
+	case 0x07:
+		reg.rlcA()
+	case 0x08:
+		value := mem.readWord(reg.pc)
+		reg.ldnnSP(value, mem)
+	case 0x09:
+		value := concatenateBytes(reg.b, reg.c)
+		reg.addHLn(value)
+	case 0x0A:
+		reg.ldAn()
 	}
 }
