@@ -393,6 +393,51 @@ func TestDecnn(t *testing.T) {
 	}
 }
 
+func TestSwapn(t *testing.T) {
+	var reg Register
+	reg.a = 1
+	reg.swapn("A")
+	if reg.a != 0x10 {
+		t.Errorf("%d in register A, expected 128", reg.a)
+	}
+}
+
+func TestDaa(t *testing.T) {
+	var reg Register
+	reg.a = 1
+	reg.setRegisterFlag(true, 5)
+	reg.dAA()
+	if reg.a != 7 {
+		t.Errorf("%d in register A, expected 97", reg.a)
+	}
+}
+
+func TestCpl(t *testing.T) {
+	var reg Register
+	reg.a = 1
+	reg.cpl()
+	if reg.a != 254 {
+		t.Errorf("%d in register A, expexted 254", reg.a)
+	}
+}
+
+func TestCcf(t *testing.T) {
+	var reg Register
+	reg.setRegisterFlag(true, 4)
+	reg.ccf()
+	if reg.flags != 0 {
+		t.Errorf("failed to reset carry flag")
+	}
+}
+
+func TestScf(t *testing.T) {
+	var reg Register
+	reg.scf()
+	if reg.flags != 16 {
+		t.Errorf("failed to set carry flag")
+	}
+}
+
 func TestRlcA(t *testing.T) {
 	var reg Register
 	reg.a = 129

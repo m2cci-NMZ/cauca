@@ -564,31 +564,31 @@ func (reg *Register) swapn(register string) {
 	switch register {
 	case "A":
 		value := reg.a
-		value = ((value & 0x0F) << 4) | ((value & 0xF0) >> 4)
+		value = ((value & 0x0f) << 4) | ((value & 0xf0) >> 4)
 		reg.a = value
 	case "B":
 		value := reg.b
-		value = ((value & 0x0F) << 4) | ((value & 0xF0) >> 4)
+		value = ((value & 0x0f) << 4) | ((value & 0xf0) >> 4)
 		reg.b = value
 	case "C":
 		value := reg.c
-		value = ((value & 0x0F) << 4) | ((value & 0xF0) >> 4)
+		value = ((value & 0x0f) << 4) | ((value & 0xf0) >> 4)
 		reg.c = value
 	case "D":
 		value := reg.d
-		value = ((value & 0x0F) << 4) | ((value & 0xF0) >> 4)
+		value = ((value & 0x0f) << 4) | ((value & 0xf0) >> 4)
 		reg.d = value
 	case "E":
 		value := reg.e
-		value = ((value & 0x0F) << 4) | ((value & 0xF0) >> 4)
+		value = ((value & 0x0f) << 4) | ((value & 0xf0) >> 4)
 		reg.e = value
 	case "H":
 		value := reg.h
-		value = ((value & 0x0F) << 4) | ((value & 0xF0) >> 4)
+		value = ((value & 0x0f) << 4) | ((value & 0xf0) >> 4)
 		reg.h = value
 	case "L":
 		value := reg.l
-		value = ((value & 0x0F) << 4) | ((value & 0xF0) >> 4)
+		value = ((value & 0x0f) << 4) | ((value & 0xf0) >> 4)
 		reg.l = value
 	}
 	// zero flag
@@ -608,16 +608,16 @@ func (reg *Register) dAA() {
 	value = uint16(reg.a)
 	if hasBit(uint16(reg.flags), 6) {
 		if hasBit(uint16(reg.flags), 5) {
-			value = (value - 0x06) & 0xFF
+			value = (value - 0x06) & 0xff
 		}
 		if hasBit(uint16(reg.flags), 4) {
 			value -= 0x60
 		}
 	} else {
-		if hasBit(uint16(reg.flags), 5) || ((value & 0xF) > 9) {
+		if hasBit(uint16(reg.flags), 5) || ((value & 0xf) > 9) {
 			value += 0x06
 		}
-		if hasBit(uint16(reg.flags), 4) || value > 0x9F {
+		if hasBit(uint16(reg.flags), 4) || value > 0x9f {
 			value += 0x60
 		}
 	}
@@ -652,7 +652,7 @@ func (reg *Register) ccf() {
 	}
 	// negative flag
 	reg.setRegisterFlag(false, 6)
-	// haf carry flag
+	// half carry flag
 	reg.setRegisterFlag(false, 5)
 }
 
