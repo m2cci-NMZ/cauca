@@ -590,3 +590,51 @@ func TestResBr(t *testing.T) {
 		t.Errorf("%d in register A, expected 0", reg.a)
 	}
 }
+
+func TestJpnn(t *testing.T) {
+	var reg Register
+	var value uint16 = 10
+	reg.jpnn(value)
+	if reg.pc != value {
+		t.Errorf("%d in program counter, expected %d", reg.pc, value)
+	}
+}
+
+func TestJpccnn(t *testing.T) {
+	var reg Register
+	var value uint16 = 10
+	reg.setRegisterFlag(false, 7)
+	reg.jpccnn(value, "Z")
+	if reg.pc != 0 {
+		t.Errorf("%d in program counter, expected 0", reg.pc)
+	}
+}
+
+func TestJpHL(t *testing.T) {
+	var reg Register
+	reg.h = 1
+	reg.l = 1
+	reg.jpHL()
+	if reg.pc != concatenateBytes(reg.h, reg.l) {
+		t.Errorf("%d in program counter, expected %d", reg.pc, concatenateBytes(reg.h, reg.l))
+	}
+}
+
+func TestJrn(t *testing.T) {
+	var reg Register
+	reg.pc = 1
+	reg.jrn(10)
+	if reg.pc != 11 {
+		t.Errorf("%d in program counter, expected 11", reg.pc)
+	}
+}
+
+func TestJrccnn(t *testing.T) {
+	var reg Register
+	reg.pc = 1
+	reg.setRegisterFlag(false, 7)
+	reg.jrccn(10, "Z")
+	if reg.pc != 1 {
+		t.Errorf("%d in program counter, expected 1", reg.pc)
+	}
+}
