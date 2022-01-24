@@ -449,3 +449,118 @@ func TestRlcA(t *testing.T) {
 		t.Errorf("bit 7 of register A was not carried")
 	}
 }
+
+func TestRlA(t *testing.T) {
+	var reg Register
+	reg.a = 129
+	reg.setRegisterFlag(true, 4)
+	reg.rlA()
+	if reg.a != 3 {
+		t.Errorf("%d in register A, expected 3", reg.a)
+	}
+	if !hasBit(uint16(reg.flags), 4) {
+		t.Errorf("bit 7 of register A was not carried")
+	}
+}
+
+func TestRrcA(t *testing.T) {
+	var reg Register
+	reg.a = 129
+	reg.rrcA()
+	if reg.a != 64 {
+		t.Errorf("%d in register A, expected 64", reg.a)
+	}
+	if !hasBit(uint16(reg.flags), 4) {
+		t.Errorf("carry flag not set")
+	}
+}
+
+func TestRrA(t *testing.T) {
+	var reg Register
+	reg.a = 129
+	reg.setRegisterFlag(true, 4)
+	reg.rrA()
+	if reg.a != 192 {
+		t.Errorf("%d in register A, expected 64", reg.a)
+	}
+	if !hasBit(uint16(reg.flags), 4) {
+		t.Errorf("carry flag not set")
+	}
+}
+
+func TestRlcn(t *testing.T) {
+	var reg Register
+	reg.b = 129
+	reg.rlcn("B")
+	if reg.b != 2 {
+		t.Errorf("%d in register A, expected 2", reg.a)
+	}
+	if !hasBit(uint16(reg.flags), 4) {
+		t.Errorf("bit 7 of register A was not carried")
+	}
+}
+
+func TestRln(t *testing.T) {
+	var reg Register
+	reg.b = 129
+	reg.setRegisterFlag(true, 4)
+	reg.rln("B")
+	if reg.b != 3 {
+		t.Errorf("%d in register A, expected 3", reg.a)
+	}
+	if !hasBit(uint16(reg.flags), 4) {
+		t.Errorf("bit 7 of register A was not carried")
+	}
+}
+
+func TestRrcn(t *testing.T) {
+	var reg Register
+	reg.b = 129
+	reg.rrcn("B")
+	if reg.b != 64 {
+		t.Errorf("%d in register A, expected 64", reg.a)
+	}
+	if !hasBit(uint16(reg.flags), 4) {
+		t.Errorf("carry flag not set")
+	}
+}
+
+func TestRrn(t *testing.T) {
+	var reg Register
+	reg.b = 129
+	reg.setRegisterFlag(true, 4)
+	reg.rrn("B")
+	if reg.b != 192 {
+		t.Errorf("%d in register A, expected 64", reg.a)
+	}
+	if !hasBit(uint16(reg.flags), 4) {
+		t.Errorf("carry flag not set")
+	}
+}
+
+func TestSlAn(t *testing.T) {
+	var reg Register
+	reg.a = 1
+	reg.slan("A")
+	if reg.a != 2 {
+		t.Errorf("%d in register A, expected 2", reg.a)
+	}
+}
+
+func TestSrAn(t *testing.T) {
+	var reg Register
+	reg.a = 130
+	reg.sran("A")
+	if reg.a != 193 {
+		t.Errorf("%d in register A, expected 1", reg.a)
+	}
+}
+
+func TestSrln(t *testing.T) {
+	var reg Register
+	reg.a = 2
+	reg.srln("A")
+	if reg.a != 1 {
+		t.Errorf("%d in register A, expected 1", reg.a)
+	}
+}

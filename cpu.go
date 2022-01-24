@@ -670,33 +670,11 @@ func (reg *Register) scf() {
 /* *************************************** */
 
 // this is VERY tricky, maybe worth writing unit tests
-func (reg *Register) rlcA() {
-	value := uint16(reg.a) << 1
-	if hasBit(uint16(reg.flags), 4) {
-		var pos uint16 = 7
-		value |= pos
-	}
-	//zero flag
-	if value != 0 {
-		reg.setRegisterFlag(false, 7)
-	} else {
-		reg.setRegisterFlag(true, 7)
-	}
-	// negative flag
-	reg.setRegisterFlag(false, 6)
-	// half carry flag
-	reg.setRegisterFlag(false, 5)
-	//carry flag
-	if (reg.a & 0x80) != 0 {
-		reg.setRegisterFlag(true, 4)
-	} else {
-		reg.setRegisterFlag(false, 4)
-	}
-	reg.a = byte(value)
-}
-
 func (reg *Register) rlA() {
 	value := uint16(reg.a) << 1
+	if hasBit(uint16(reg.flags), 4) {
+		value++
+	}
 	//zero flag
 	if value != 0 {
 		reg.setRegisterFlag(false, 7)
@@ -707,20 +685,41 @@ func (reg *Register) rlA() {
 	reg.setRegisterFlag(false, 6)
 	// half carry flag
 	reg.setRegisterFlag(false, 5)
-	reg.a = byte(value)
 	//carry flag
 	if (reg.a & 0x80) != 0 {
 		reg.setRegisterFlag(true, 4)
 	} else {
 		reg.setRegisterFlag(false, 4)
 	}
+	reg.a = byte(value)
 }
 
-func (reg *Register) rrcA() {
+func (reg *Register) rlcA() {
+	value := uint16(reg.a) << 1
+	//zero flag
+	if value != 0 {
+		reg.setRegisterFlag(false, 7)
+	} else {
+		reg.setRegisterFlag(true, 7)
+	}
+	// negative flag
+	reg.setRegisterFlag(false, 6)
+	// half carry flag
+	reg.setRegisterFlag(false, 5)
+	//carry flag
+	if (reg.a & 0x80) != 0 {
+		reg.setRegisterFlag(true, 4)
+	} else {
+		reg.setRegisterFlag(false, 4)
+	}
+	reg.a = byte(value)
+}
+
+func (reg *Register) rrA() {
 	value := uint16(reg.a) >> 1
 	if hasBit(uint16(reg.flags), 4) {
-		var pos uint16 = 1
-		value |= pos
+		var pos uint16 = 7
+		value |= 1 << pos
 	}
 	//zero flag
 	if value != 0 {
@@ -741,7 +740,7 @@ func (reg *Register) rrcA() {
 	reg.a = byte(value)
 }
 
-func (reg *Register) rrA() {
+func (reg *Register) rrcA() {
 	value := uint16(reg.a) >> 1
 	//zero flag
 	if value != 0 {
@@ -753,10 +752,16 @@ func (reg *Register) rrA() {
 	reg.setRegisterFlag(false, 6)
 	// half carry flag
 	reg.setRegisterFlag(false, 5)
+	//carry flag
+	if reg.a&0x01 != 0 {
+		reg.setRegisterFlag(true, 4)
+	} else {
+		reg.setRegisterFlag(false, 4)
+	}
 	reg.a = byte(value)
 }
 
-func (reg *Register) rlcn(destination string) {
+func (reg *Register) rln(destination string) {
 	var register byte
 	switch destination {
 	case "A":
@@ -774,10 +779,9 @@ func (reg *Register) rlcn(destination string) {
 	case "L":
 		register = reg.l
 	}
-	value := uint16(register) >> 1
+	value := uint16(register) << 1
 	if hasBit(uint16(reg.flags), 4) {
-		var pos uint16 = 1
-		value |= (pos << 7)
+		value++
 	}
 	//zero flag
 	if value != 0 {
@@ -790,7 +794,7 @@ func (reg *Register) rlcn(destination string) {
 	// half carry flag
 	reg.setRegisterFlag(false, 5)
 	//carry flag
-	if register != 0 {
+	if (register & 0x80) != 0 {
 		reg.setRegisterFlag(true, 4)
 	} else {
 		reg.setRegisterFlag(false, 4)
@@ -813,7 +817,7 @@ func (reg *Register) rlcn(destination string) {
 	}
 }
 
-func (reg *Register) rln(destination string) {
+func (reg *Register) rlcn(destination string) {
 	var register byte
 	switch destination {
 	case "A":
@@ -842,6 +846,12 @@ func (reg *Register) rln(destination string) {
 	reg.setRegisterFlag(false, 6)
 	// half carry flag
 	reg.setRegisterFlag(false, 5)
+	//carry flag
+	if (register & 0x80) != 0 {
+		reg.setRegisterFlag(true, 4)
+	} else {
+		reg.setRegisterFlag(false, 4)
+	}
 	switch destination {
 	case "A":
 		reg.a = byte(value)
@@ -879,10 +889,6 @@ func (reg *Register) rrcn(destination string) {
 		register = reg.l
 	}
 	value := uint16(register) >> 1
-	if hasBit(uint16(reg.flags), 4) {
-		var pos uint16 = 1
-		value |= pos
-	}
 	//zero flag
 	if value != 0 {
 		reg.setRegisterFlag(false, 7)
@@ -894,7 +900,7 @@ func (reg *Register) rrcn(destination string) {
 	// half carry flag
 	reg.setRegisterFlag(false, 5)
 	//carry flag
-	if (register & 0x80) != 0 {
+	if register&0x01 != 0 {
 		reg.setRegisterFlag(true, 4)
 	} else {
 		reg.setRegisterFlag(false, 4)
@@ -935,6 +941,10 @@ func (reg *Register) rrn(destination string) {
 		register = reg.l
 	}
 	value := uint16(register) >> 1
+	if hasBit(uint16(reg.flags), 4) {
+		var pos uint16 = 7
+		value |= 1 << pos
+	}
 	//zero flag
 	if value != 0 {
 		reg.setRegisterFlag(false, 7)
@@ -946,7 +956,7 @@ func (reg *Register) rrn(destination string) {
 	// half carry flag
 	reg.setRegisterFlag(false, 5)
 	//carry flag
-	if (register & 0x80) != 0 {
+	if register&0x01 != 0 {
 		reg.setRegisterFlag(true, 4)
 	} else {
 		reg.setRegisterFlag(false, 4)
@@ -1043,6 +1053,9 @@ func (reg *Register) sran(destination string) {
 		register = reg.l
 	}
 	value := register >> 1
+	if register&0x80 != 0 {
+		value |= (1 << 7)
+	}
 	//zero flag
 	if value != 0 {
 		reg.setRegisterFlag(false, 7)
