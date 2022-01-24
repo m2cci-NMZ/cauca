@@ -71,21 +71,31 @@ func (reg *Register) ldr1r2(destination string, source string) {
 	*(reg_map[destination]) = *(reg_map[source])
 }
 
-func (reg *Register) ldAn(source string) {
+func (reg *Register) ldAn(source string, mem *Memory) {
 	switch source {
 	case "A":
+		reg.a = mem.readByte(uint16(reg.a))
 	case "B":
-		reg.a = reg.b
+		reg.a = mem.readByte(uint16(reg.b))
 	case "C":
-		reg.a = reg.c
+		reg.a = mem.readByte(uint16(reg.c))
 	case "D":
-		reg.a = reg.d
+		reg.a = mem.readByte(uint16(reg.d))
 	case "E":
-		reg.a = reg.e
+		reg.a = mem.readByte(uint16(reg.e))
 	case "H":
-		reg.a = reg.h
+		reg.a = mem.readByte(uint16(reg.h))
 	case "L":
-		reg.a = reg.l
+		reg.a = mem.readByte(uint16(reg.l))
+	case "BC":
+		reg.a = mem.readByte(concatenateBytes(reg.b, reg.c))
+	case "DE":
+		reg.a = mem.readByte(concatenateBytes(reg.d, reg.e))
+	case "HL":
+		reg.a = mem.readByte(concatenateBytes(reg.h, reg.l))
+	default:
+		address, _ := strconv.ParseInt(source, 16, 16)
+		reg.a = mem.readByte(uint16(address))
 	}
 }
 
@@ -1314,7 +1324,18 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 	case 0x09:
 		value := concatenateBytes(reg.b, reg.c)
 		reg.addHLn(value)
-	case 0x0A:
-		reg.ldAn()
+	case 0x0a:
+		reg.ldAn("BC", mem)
+	case 0x0b:
+		reg.decnn("BC")
+	case 0x0c:
+		reg.incn("C")
+	case 0x0d:
+		reg.decn("C")
+	case 0x0e:
+		value := mem.readByte(reg.pc)
+		reg.ldnnn(value, "C")
+	case 0x0f:
+		reg.rrcA()
 	}
 }

@@ -23,10 +23,12 @@ func TestLdr1r2(t *testing.T) {
 
 func TestLdAn(t *testing.T) {
 	var reg Register
+	var mem Memory
+	mem.writeByte(10, 10)
 	reg.c = 10
-	reg.ldAn("C")
-	if reg.a != reg.c {
-		t.Errorf("%d for register A, expected %d", reg.a, reg.c)
+	reg.ldAn("C", &mem)
+	if reg.a != mem.readByte(uint16(reg.c)) {
+		t.Errorf("%d for register A, expected %d", reg.a, mem.readByte(uint16(reg.c)))
 	}
 }
 
@@ -398,7 +400,7 @@ func TestRlcA(t *testing.T) {
 	if reg.a != 2 {
 		t.Errorf("%d in register A, expected 2", reg.a)
 	}
-	if hasBit(uint16(reg.flags), 4) {
+	if !hasBit(uint16(reg.flags), 4) {
 		t.Errorf("bit 7 of register A was not carried")
 	}
 }
