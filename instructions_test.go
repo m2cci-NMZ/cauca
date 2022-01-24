@@ -638,3 +638,37 @@ func TestJrccnn(t *testing.T) {
 		t.Errorf("%d in program counter, expected 1", reg.pc)
 	}
 }
+
+func TestCallnn(t *testing.T) {
+	var reg Register
+	var mem Memory
+	var value uint16 = 10
+	mem.writeWord(0, 1)
+	reg.callnn(value, &mem)
+	if reg.pc != value {
+		t.Errorf("%d in program counter, expected %d", reg.pc, value)
+	}
+	if reg.sp != 2 {
+		t.Errorf("stack pointer not increased")
+	}
+	if mem.readWord(reg.sp-2) != 1 {
+		t.Errorf("adress not pushed to stack")
+	}
+}
+
+func TestCallccnn(t *testing.T) {
+	var reg Register
+	var mem Memory
+	var value uint16 = 10
+	mem.writeWord(0, 1)
+	reg.callccnn(value, "Z", &mem)
+	if reg.pc == value {
+		t.Errorf("%d in program counter, expected %d", reg.pc, value)
+	}
+	if reg.sp == 2 {
+		t.Errorf("stack pointer not increased")
+	}
+	if mem.readWord(reg.sp-2) == 1 {
+		t.Errorf("adress not pushed to stack")
+	}
+}

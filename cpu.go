@@ -1280,7 +1280,7 @@ func (reg *Register) jrccn(n uint16, condition string) {
 
 func (reg *Register) callnn(destination uint16, mem *Memory) {
 	mem.writeWord(reg.sp, reg.pc+1)
-	reg.sp++
+	reg.sp += 2
 	reg.pc = destination
 }
 
