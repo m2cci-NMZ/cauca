@@ -564,3 +564,29 @@ func TestSrln(t *testing.T) {
 		t.Errorf("%d in register A, expected 1", reg.a)
 	}
 }
+
+func TestBitBr(t *testing.T) {
+	var reg Register
+	reg.a = 1
+	reg.bitBr("A", 0)
+	if !hasBit(uint16(reg.flags), 7) {
+		t.Errorf("zero flag not set")
+	}
+}
+
+func TestSetBr(t *testing.T) {
+	var reg Register
+	reg.setBr("A", 0)
+	if reg.a != 1 {
+		t.Errorf("%d in register A, expected 1", reg.a)
+	}
+}
+
+func TestResBr(t *testing.T) {
+	var reg Register
+	reg.a = 1
+	reg.resBr("A", 0)
+	if reg.a != 0 {
+		t.Errorf("%d in register A, expected 0", reg.a)
+	}
+}
