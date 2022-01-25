@@ -1813,6 +1813,47 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 	case 0xbf:
 		value := mem.readByte(uint16(reg.a))
 		reg.cpn(value)
+	case 0xc0:
+		reg.retcc(mem, "NZ")
+	case 0xc1:
+		reg.popnn("BC", mem)
+	case 0xc2:
+		value := mem.readWord(reg.pc)
+		reg.jpccnn(value, "NZ")
+	case 0xc3:
+		value := mem.readWord(reg.pc)
+		reg.jpnn(value)
+	case 0xc4:
+		value := mem.readWord(reg.pc)
+		reg.callccnn(value, "NZ", mem)
+	case 0xc5:
+		reg.pushnn("BC", mem)
+	case 0xc6:
+		value := mem.readByte(reg.pc)
+		reg.addAn(value)
+	case 0xc7:
+		//reset
+	case 0xc8:
+		reg.retcc(mem, "Z")
+	case 0xc9:
+		reg.ret(mem)
+	case 0xca:
+		value := mem.readWord(reg.pc)
+		reg.jpccnn(value, "Z")
+	case 0xcb:
+		//cb prefix
+	case 0xcc:
+		value := mem.readWord(reg.pc)
+		reg.callccnn(value, "Z", mem)
+	case 0xcd:
+		value := mem.readWord(reg.pc)
+		reg.callnn(value, mem)
+	case 0xce:
+		value := mem.readByte(reg.pc)
+		reg.addcAn(value)
+	case 0xcf:
+		//reset
+
 	}
 
 }
