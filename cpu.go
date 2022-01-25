@@ -1695,6 +1695,54 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 	case 0x9f:
 		value := mem.readByte(uint16(reg.a))
 		reg.sbcAn(value)
+	case 0xa0:
+		value := mem.readByte(uint16(reg.b))
+		reg.andn(value)
+	case 0xa1:
+		value := mem.readByte(uint16(reg.c))
+		reg.andn(value)
+	case 0xa2:
+		value := mem.readByte(uint16(reg.d))
+		reg.andn(value)
+	case 0xa3:
+		value := mem.readByte(uint16(reg.e))
+		reg.andn(value)
+	case 0xa4:
+		value := mem.readByte(uint16(reg.h))
+		reg.andn(value)
+	case 0xa5:
+		value := mem.readByte(uint16(reg.l))
+		reg.andn(value)
+	case 0xa6:
+		value := mem.readByte(concatenateBytes(reg.h, reg.l))
+		reg.andn(value)
+	case 0xa7:
+		value := mem.readByte(uint16(reg.a))
+		reg.andn(value)
+	case 0xa8:
+		value := mem.readByte(uint16(reg.b))
+		reg.xorn(value)
+	case 0xa9:
+		value := mem.readByte(uint16(reg.c))
+		reg.xorn(value)
+	case 0xaa:
+		value := mem.readByte(uint16(reg.d))
+		reg.xorn(value)
+	case 0xab:
+		value := mem.readByte(uint16(reg.e))
+		reg.xorn(value)
+	case 0xac:
+		value := mem.readByte(uint16(reg.h))
+		reg.xorn(value)
+	case 0xad:
+		value := mem.readByte(uint16(reg.l))
+		reg.xorn(value)
+	case 0xae:
+		value := mem.readByte(concatenateBytes(reg.h, reg.l))
+		reg.xorn(value)
+	case 0xaf:
+		value := mem.readByte(uint16(reg.a))
+		reg.xorn(value)
 	}
 
 }
