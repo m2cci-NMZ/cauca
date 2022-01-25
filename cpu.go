@@ -1321,6 +1321,28 @@ func (reg *Register) callccnn(n uint16, condition string, mem *Memory) {
 	}
 }
 
+/* *************************************** */
+/* Returns                                 */
+/* *************************************** */
+
+func (reg *Register) ret(mem *Memory) {
+	address := mem.readWord(reg.sp)
+	reg.pc = address
+	reg.sp += 2
+}
+
+func (reg *Register) retcc(mem *Memory, condition string) {
+	if condition == "NZ" && !hasBit(uint16(reg.flags), 7) {
+		reg.ret(mem)
+	} else if condition == "Z" && hasBit(uint16(reg.flags), 7) {
+		reg.ret(mem)
+	} else if condition == "NC" && !hasBit(uint16(reg.flags), 4) {
+		reg.ret(mem)
+	} else if condition == "C" && hasBit(uint16(reg.flags), 4) {
+		reg.ret(mem)
+	}
+}
+
 func (reg *Register) execute(opcode byte, mem *Memory) {
 	switch opcode {
 	case 0x00:
