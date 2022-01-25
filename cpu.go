@@ -58,7 +58,7 @@ func (reg *Register) ldnnn(value byte, destination string) {
 	}
 }
 
-func (reg *Register) ldr1r2(destination string, source string) {
+func (reg *Register) ldr1r2(destination string, source string, mem *Memory) {
 	reg_map := map[string]*byte{
 		"A": &(reg.a),
 		"B": &(reg.b),
@@ -68,7 +68,15 @@ func (reg *Register) ldr1r2(destination string, source string) {
 		"H": &(reg.h),
 		"L": &(reg.l),
 	}
-	*(reg_map[destination]) = *(reg_map[source])
+	if source == "HL" {
+		*(reg_map[destination]) = mem.readByte(concatenateBytes(reg.h, reg.l))
+	} else if destination == "HL" {
+		value := mem.readWord(uint16(*(reg_map[source])))
+		reg.h = byte(value & 0xff00)
+		reg.l = byte(value & 0x00ff)
+	} else {
+		*(reg_map[destination]) = mem.readByte(uint16(*(reg_map[source])))
+	}
 }
 
 func (reg *Register) ldAn(source string, mem *Memory) {
@@ -1463,5 +1471,38 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 		reg.ldAn("0x3e", mem)
 	case 0x3f:
 		reg.ccf()
+	case 0x40:
+		reg.ldr1r2("B", "B", mem)
+	case 0x41:
+		reg.ldr1r2("B", "C", mem)
+	case 0x42:
+		reg.ldr1r2("B", "D", mem)
+	case 0x43:
+		reg.ldr1r2("B", "E", mem)
+	case 0x44:
+		reg.ldr1r2("B", "H", mem)
+	case 0x45:
+		reg.ldr1r2("B", "L", mem)
+	case 0x46:
+		reg.ldr1r2("B", "HL", mem)
+	case 0x47:
+		reg.ldr1r2("B", "A", mem)
+	case 0x48:
+		reg.ldr1r2("C", "B", mem)
+	case 0x49:
+		reg.ldr1r2("C", "C", mem)
+	case 0x4a:
+		reg.ldr1r2("C", "D", mem)
+	case 0x4b:
+		reg.ldr1r2("C", "E", mem)
+	case 0x4c:
+		reg.ldr1r2("C", "H", mem)
+	case 0x4d:
+		reg.ldr1r2("C", "L", mem)
+	case 0x4e:
+		reg.ldr1r2("C", "HL", mem)
+	case 0x4f:
+		reg.ldr1r2("C", "A", mem)
 	}
+
 }

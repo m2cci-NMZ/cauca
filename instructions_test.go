@@ -14,8 +14,10 @@ func TestLdnnn(t *testing.T) {
 
 func TestLdr1r2(t *testing.T) {
 	var reg Register
+	var mem Memory
 	reg.a = 10
-	reg.ldr1r2("D", "A")
+	mem.writeByte(uint16(reg.a), 10)
+	reg.ldr1r2("D", "A", &mem)
 	if reg.d != reg.a {
 		t.Errorf("%d for register D, expected %d", reg.a, reg.d)
 	}
