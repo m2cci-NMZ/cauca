@@ -1503,6 +1503,38 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 		reg.ldr1r2("C", "HL", mem)
 	case 0x4f:
 		reg.ldr1r2("C", "A", mem)
+	case 0x50:
+		reg.ldr1r2("D", "B", mem)
+	case 0x51:
+		reg.ldr1r2("D", "C", mem)
+	case 0x52:
+		reg.ldr1r2("D", "D", mem)
+	case 0x53:
+		reg.ldr1r2("D", "E", mem)
+	case 0x54:
+		reg.ldr1r2("D", "H", mem)
+	case 0x55:
+		reg.ldr1r2("D", "L", mem)
+	case 0x56:
+		reg.ldr1r2("D", "HL", mem)
+	case 0x57:
+		reg.ldr1r2("D", "A", mem)
+	case 0x58:
+		reg.ldr1r2("E", "B", mem)
+	case 0x59:
+		reg.ldr1r2("E", "C", mem)
+	case 0x5a:
+		reg.ldr1r2("E", "D", mem)
+	case 0x5b:
+		reg.ldr1r2("E", "E", mem)
+	case 0x5c:
+		reg.ldr1r2("E", "H", mem)
+	case 0x5d:
+		reg.ldr1r2("E", "L", mem)
+	case 0x5e:
+		reg.ldr1r2("E", "HL", mem)
+	case 0x5f:
+		reg.ldr1r2("E", "A", mem)
 	}
 
 }
