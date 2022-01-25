@@ -1894,6 +1894,39 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 	case 0xe0:
 		value := mem.readByte(reg.pc)
 		reg.ldhnA(value, mem)
+	case 0xe1:
+		reg.popnn("HL", mem)
+	case 0xe2:
+		reg.ldCA(mem)
+	case 0xe3:
+		//not used
+	case 0xe4:
+		//not used
+	case 0xe5:
+		reg.pushnn("HL", mem)
+	case 0xe6:
+		value := mem.readByte(reg.pc)
+		reg.andn(value)
+	case 0xe7:
+		//reset
+	case 0xe8:
+		value := mem.readWord(reg.pc)
+		reg.addSPn(value)
+	case 0xe9:
+		reg.jpHL()
+	case 0xea:
+		reg.ldnA("HL", mem)
+	case 0xeb:
+		//not used
+	case 0xec:
+		//not used
+	case 0xed:
+		//not used
+	case 0xee:
+		value := mem.readByte(reg.pc)
+		reg.xorn(value)
+	case 0xef:
+		//Reset
 	}
 
 }
