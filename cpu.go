@@ -1927,6 +1927,43 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 		reg.xorn(value)
 	case 0xef:
 		//Reset
+	case 0xf0:
+		reg.ldAn("0xf0", mem)
+	case 0xf1:
+		reg.popnn("AF", mem)
+	case 0xf2:
+		reg.ldAn("C", mem)
+	case 0xf3:
+		//not implemented
+	case 0xf4:
+		//not used
+	case 0xf5:
+		reg.pushnn("AF", mem)
+	case 0xf6:
+		value := mem.readByte(reg.pc)
+		reg.orn(value)
+	case 0xf7:
+		//reset
+	case 0xf8:
+		value := mem.readByte(reg.pc)
+		reg.ldHLSPn(value)
+	case 0xf9:
+		reg.ldSPHL()
+	case 0xfa:
+		//implement this properly
+		reg.ldAn("OxfA", mem)
+	case 0xfb:
+		//not implemented
+	case 0xfc:
+		//not used
+	case 0xfd:
+		//not used
+	case 0xfe:
+		value := mem.readByte(reg.pc)
+		reg.cpn(value)
+	case 0xff:
+		//reset
+
 	}
 
 }
