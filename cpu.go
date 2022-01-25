@@ -1316,6 +1316,7 @@ func (reg *Register) callccnn(n uint16, condition string, mem *Memory) {
 func (reg *Register) execute(opcode byte, mem *Memory) {
 	switch opcode {
 	case 0x00:
+		//nop
 	case 0x01:
 		reg.ldnnn16(mem.readWord(reg.pc), "BC")
 	case 0x02:
@@ -1350,5 +1351,117 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 		reg.ldnnn(value, "C")
 	case 0x0f:
 		reg.rrcA()
+	case 0x10:
+		//stop
+	case 0x11:
+		value := mem.readWord(reg.pc)
+		reg.ldnnn16(value, "DE")
+	case 0x12:
+		reg.ldnA("DE", mem)
+	case 0x13:
+		reg.incnn("DE")
+	case 0x14:
+		reg.incn("D")
+	case 0x15:
+		reg.decn("D")
+	case 0x16:
+		value := mem.readByte(reg.pc)
+		reg.ldnnn(value, "D")
+	case 0x17:
+		reg.rlA()
+	case 0x18:
+		value := mem.readWord(reg.pc)
+		reg.jrn(value)
+	case 0x19:
+		value := mem.readWord(concatenateBytes(reg.d, reg.e))
+		reg.addHLn(value)
+	case 0x1a:
+		reg.ldAn("DE", mem)
+	case 0x1b:
+		reg.decnn("DE")
+	case 0x1c:
+		reg.incn("E")
+	case 0x1d:
+		reg.decn("E")
+	case 0x1e:
+		value := mem.readByte(reg.pc)
+		reg.ldnnn(value, "E")
+	case 0x1f:
+		reg.rrA()
+	case 0x20:
+		value := mem.readWord(reg.pc)
+		reg.jrccn(value, "NZ")
+	case 0x21:
+		value := mem.readWord(reg.pc)
+		reg.ldnnn16(value, "HL")
+	case 0x22:
+		reg.ldiHLA(mem)
+	case 0x23:
+		reg.incnn("HL")
+	case 0x24:
+		reg.incn("H")
+	case 0x25:
+		reg.decn("H")
+	case 0x26:
+		value := mem.readByte(reg.pc)
+		reg.ldnnn(value, "H")
+	case 0x27:
+		reg.dAA()
+	case 0x28:
+		value := mem.readWord(reg.pc)
+		reg.jrccn(value, "Z")
+	case 0x29:
+		value := mem.readWord(concatenateBytes(reg.h, reg.l))
+		reg.addHLn(value)
+	case 0x2a:
+		reg.ldiAHL(mem)
+	case 0x2b:
+		reg.decnn("HL")
+	case 0x2c:
+		reg.incn("L")
+	case 0x2d:
+		reg.decn("L")
+	case 0x2e:
+		value := mem.readByte(reg.pc)
+		reg.ldnnn(value, "L")
+	case 0x2f:
+		reg.cpl()
+	case 0x30:
+		value := mem.readWord(reg.pc)
+		reg.jrccn(value, "NC")
+	case 0x31:
+		value := mem.readWord(reg.sp)
+		reg.ldnnn16(value, "SP")
+	case 0x32:
+		reg.ldiHLA(mem)
+	case 0x33:
+		reg.incnn("SP")
+	case 0x34:
+		reg.incnn("HL")
+	case 0x35:
+		reg.decnn("HL")
+	case 0x36:
+		value := mem.readWord(reg.pc)
+		reg.ldnnn16(value, "HL")
+	case 0x37:
+		reg.scf()
+	case 0x38:
+		value := mem.readWord(reg.pc)
+		reg.jrccn(value, "C")
+	case 0x39:
+		value := mem.readWord(reg.sp)
+		reg.addHLn(value)
+	case 0x3a:
+		reg.ldiAHL(mem)
+	case 0x3b:
+		reg.decnn("SP")
+	case 0x3c:
+		reg.incn("A")
+	case 0x3d:
+		reg.decn("A")
+	case 0x3e:
+		reg.ldAn("0x3e", mem)
+	case 0x3f:
+		reg.ccf()
 	}
 }
