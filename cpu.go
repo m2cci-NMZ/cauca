@@ -15,9 +15,29 @@ type Register struct {
 	pc    uint16
 }
 
+/* *************************************** */
+/* Helper functions                        */
+/* *************************************** */
+
 func concatenateBytes(a byte, b byte) uint16 {
 	result := (uint16(a) << 8) + uint16(b)
 	return result
+}
+
+func separateWord(value uint16) (byte, byte) {
+	a := byte(value >> 8)
+	b := byte(value)
+	return a, b
+}
+
+func (reg *Register) getHLregister() uint16 {
+	return concatenateBytes(reg.h, reg.l)
+}
+
+func (reg *Register) setHLregisters(value uint16) {
+	a, b := separateWord(value)
+	reg.h = a
+	reg.l = b
 }
 
 /* *************************************** */
