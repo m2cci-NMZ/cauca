@@ -2096,5 +2096,37 @@ func (reg *Register) executeCb(opcode byte, mem *Memory) {
 		reg.srln("HL")
 	case 0x3f:
 		reg.srln("A")
+	case 0x40:
+		reg.bitBr("B", 0)
+	case 0x41:
+		reg.bitBr("C", 0)
+	case 0x42:
+		reg.bitBr("D", 0)
+	case 0x43:
+		reg.bitBr("E", 0)
+	case 0x44:
+		reg.bitBr("H", 0)
+	case 0x45:
+		reg.bitBr("L", 0)
+	case 0x46:
+		reg.bitBr("HL", 0)
+	case 0x47:
+		reg.bitBr("A", 0)
+	case 0x48:
+		reg.bitBr("B", 1)
+	case 0x49:
+		reg.bitBr("C", 1)
+	case 0x4a:
+		reg.bitBr("D", 1)
+	case 0x4b:
+		reg.bitBr("E", 1)
+	case 0x4c:
+		reg.bitBr("H", 1)
+	case 0x4d:
+		reg.bitBr("L", 1)
+	case 0x4e:
+		reg.bitBr("HL", 1)
+	case 0x4f:
+		reg.bitBr("A", 1)
 	}
 }
