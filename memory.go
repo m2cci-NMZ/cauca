@@ -67,7 +67,7 @@ func (mem *Memory) writeWord(address uint16, value uint16) {
 }
 
 func (mem *Memory) loadRom(f string) {
-	data, error := os.ReadFile("/tmp/dat")
+	data, error := os.ReadFile(f)
 	if error != nil {
 		panic(error)
 	}
