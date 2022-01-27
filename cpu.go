@@ -1963,7 +1963,42 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 		reg.cpn(value)
 	case 0xff:
 		//reset
-
 	}
+}
 
+func (reg *Register) executeCb(opcode byte, mem *Memory) {
+	switch opcode {
+	case 0x00:
+		reg.rlcn("B")
+	case 0x01:
+		reg.rlcn("C")
+	case 0x02:
+		reg.rlcn("D")
+	case 0x03:
+		reg.rlcn("E")
+	case 0x04:
+		reg.rlcn("H")
+	case 0x05:
+		reg.rlcn("L")
+	case 0x06:
+		reg.rlcn("HL")
+	case 0x07:
+		reg.rlcA()
+	case 0x08:
+		reg.rrcn("B")
+	case 0x09:
+		reg.rrcn("C")
+	case 0x0a:
+		reg.rrcn("D")
+	case 0x0b:
+		reg.rrcn("E")
+	case 0x0c:
+		reg.rrcn("H")
+	case 0x0d:
+		reg.rrcn("L")
+	case 0x0e:
+		reg.rrcn("HL")
+	case 0x0f:
+		reg.rrcA()
+	}
 }
