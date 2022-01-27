@@ -2416,5 +2416,37 @@ func (reg *Register) executeCb(opcode byte, mem *Memory) {
 		reg.setBr("HL", 3)
 	case 0xdf:
 		reg.setBr("A", 3)
+	case 0xe0:
+		reg.setBr("B", 4)
+	case 0xe1:
+		reg.setBr("C", 4)
+	case 0xe2:
+		reg.setBr("D", 4)
+	case 0xe3:
+		reg.setBr("E", 4)
+	case 0xe4:
+		reg.setBr("H", 4)
+	case 0xe5:
+		reg.setBr("L", 4)
+	case 0xe6:
+		reg.setBr("HL", 4)
+	case 0xe7:
+		reg.setBr("A", 4)
+	case 0xe8:
+		reg.setBr("B", 5)
+	case 0xe9:
+		reg.setBr("C", 5)
+	case 0xea:
+		reg.setBr("D", 5)
+	case 0xeb:
+		reg.setBr("E", 5)
+	case 0xec:
+		reg.setBr("H", 5)
+	case 0xed:
+		reg.setBr("L", 5)
+	case 0xee:
+		reg.setBr("HL", 5)
+	case 0xef:
+		reg.setBr("A", 5)
 	}
 }
