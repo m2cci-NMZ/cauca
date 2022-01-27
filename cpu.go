@@ -1966,7 +1966,7 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 	}
 }
 
-func (reg *Register) executeCb(opcode byte, mem *Memory) {
+func (reg *Register) executeCb(opcode byte) {
 	switch opcode {
 	case 0x00:
 		reg.rlcn("B")
