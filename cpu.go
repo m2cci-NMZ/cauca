@@ -2032,5 +2032,37 @@ func (reg *Register) executeCb(opcode byte, mem *Memory) {
 		reg.rrn("HL")
 	case 0x1f:
 		reg.rrA()
+	case 0x20:
+		reg.slan("B")
+	case 0x21:
+		reg.slan("C")
+	case 0x22:
+		reg.slan("D")
+	case 0x23:
+		reg.slan("E")
+	case 0x24:
+		reg.slan("H")
+	case 0x25:
+		reg.slan("L")
+	case 0x26:
+		reg.slan("HL")
+	case 0x27:
+		reg.slan("A")
+	case 0x28:
+		reg.sran("B")
+	case 0x29:
+		reg.sran("C")
+	case 0x2a:
+		reg.sran("D")
+	case 0x2b:
+		reg.sran("E")
+	case 0x2c:
+		reg.sran("H")
+	case 0x2d:
+		reg.sran("L")
+	case 0x2e:
+		reg.sran("HL")
+	case 0x2f:
+		reg.sran("A")
 	}
 }
