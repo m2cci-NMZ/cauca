@@ -193,8 +193,7 @@ func (reg *Register) ldhAn(value byte, mem *Memory) {
 /* *************************************** */
 
 func (reg *Register) ldnnn16(value uint16, destination string) {
-	r1 := byte(value >> 8)
-	r2 := byte(value)
+	r1, r2 := separateWord(value)
 	switch destination {
 	case "BC":
 		reg.b = r1
@@ -211,14 +210,13 @@ func (reg *Register) ldnnn16(value uint16, destination string) {
 }
 
 func (reg *Register) ldSPHL() {
-	value := (uint16(reg.h) << 8) + uint16(reg.l)
+	value := reg.getHLregister()
 	reg.sp = value
 }
 
 func (reg *Register) ldHLSPn(value byte) {
 	result := uint16(value) + reg.sp
-	r1 := byte(result >> 8)
-	r2 := byte(result)
+	r1, r2 := separateWord(result)
 	reg.h = r1
 	reg.l = r2
 	// reset Z flag
@@ -226,13 +224,13 @@ func (reg *Register) ldHLSPn(value byte) {
 	// reset N flag
 	reg.setRegisterFlag(false, 6)
 	// set H flag
-	if (reg.sp&0x000F + uint16(value&0x0F)) > 0x0F {
+	if (reg.sp&0x000f + uint16(value&0x0f)) > 0x0F {
 		reg.setRegisterFlag(true, 5)
 	} else {
 		reg.setRegisterFlag(false, 5)
 	}
 	//set C flag
-	if (result & 0xFF00) != 0 {
+	if (result & 0xff00) != 0 {
 		reg.setRegisterFlag(true, 4)
 	} else {
 		reg.setRegisterFlag(false, 4)
