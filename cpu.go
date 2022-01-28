@@ -1,7 +1,5 @@
 package main
 
-import "strconv"
-
 type Register struct {
 	a     byte
 	b     byte
@@ -100,58 +98,45 @@ func (reg *Register) ldr1r2(destination string, source string, mem *Memory) {
 }
 
 func (reg *Register) ldAn(source string, mem *Memory) {
-	switch source {
-	case "A":
-		reg.a = mem.readByte(uint16(reg.a))
-	case "B":
-		reg.a = mem.readByte(uint16(reg.b))
-	case "C":
-		reg.a = mem.readByte(uint16(reg.c))
-	case "D":
-		reg.a = mem.readByte(uint16(reg.d))
-	case "E":
-		reg.a = mem.readByte(uint16(reg.e))
-	case "H":
-		reg.a = mem.readByte(uint16(reg.h))
-	case "L":
-		reg.a = mem.readByte(uint16(reg.l))
-	case "BC":
-		reg.a = mem.readByte(concatenateBytes(reg.b, reg.c))
-	case "DE":
-		reg.a = mem.readByte(concatenateBytes(reg.d, reg.e))
-	case "HL":
-		reg.a = mem.readByte(concatenateBytes(reg.h, reg.l))
-	default:
-		address, _ := strconv.ParseInt(source, 16, 16)
-		reg.a = mem.readByte(uint16(address))
+	reg_map := map[string]uint16{
+		"A":  uint16(reg.a),
+		"B":  uint16(reg.b),
+		"C":  uint16(reg.c),
+		"D":  uint16(reg.d),
+		"E":  uint16(reg.e),
+		"H":  uint16(reg.h),
+		"L":  uint16(reg.l),
+		"HL": reg.getHLregister(),
+		"BC": concatenateBytes(reg.b, reg.c),
+		"DE": concatenateBytes(reg.d, reg.e),
+		"PC": reg.pc,
 	}
+	reg.a = mem.readByte(reg_map[source])
 }
 
 func (reg *Register) ldnA(source string, mem *Memory) {
-	switch source {
-	case "A":
-		mem.writeByte(uint16(reg.a), reg.a)
-	case "B":
-		mem.writeByte(uint16(reg.b), reg.a)
-	case "C":
-		mem.writeByte(uint16(reg.c), reg.a)
-	case "D":
-		mem.writeByte(uint16(reg.d), reg.a)
-	case "E":
-		mem.writeByte(uint16(reg.e), reg.a)
-	case "H":
-		mem.writeByte(uint16(reg.h), reg.a)
-	case "L":
-		mem.writeByte(uint16(reg.l), reg.a)
-	case "BC":
-		mem.writeByte(concatenateBytes(reg.b, reg.c), reg.a)
-	case "DE":
-		mem.writeByte(concatenateBytes(reg.d, reg.e), reg.a)
-	case "HL":
-		mem.writeByte(concatenateBytes(reg.h, reg.l), reg.a)
-	default:
-		address, _ := strconv.ParseInt(source, 16, 16)
-		mem.writeByte(uint16(address), reg.a)
+	reg_map := map[string]byte{
+		"A": reg.a,
+		"B": reg.b,
+		"C": reg.c,
+		"D": reg.d,
+		"E": reg.e,
+		"H": reg.h,
+		"L": reg.l,
+	}
+	if len(source) == 1 {
+		reg.a = reg_map[source]
+	} else {
+		switch source {
+		case "BC":
+			mem.writeByte(concatenateBytes(reg.b, reg.c), reg.a)
+		case "DE":
+			mem.writeByte(concatenateBytes(reg.d, reg.e), reg.a)
+		case "HL":
+			mem.writeByte(reg.getHLregister(), reg.a)
+		case "PC":
+			mem.writeByte(reg.pc, reg.a)
+		}
 	}
 }
 
@@ -1495,7 +1480,7 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 	case 0x3d:
 		reg.decn("A")
 	case 0x3e:
-		reg.ldAn("0x3e", mem)
+		reg.ldAn("PC", mem)
 	case 0x3f:
 		reg.ccf()
 	case 0x40:
@@ -1955,8 +1940,8 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 	case 0xf9:
 		reg.ldSPHL()
 	case 0xfa:
-		//implement this properly
-		reg.ldAn("OxfA", mem)
+		var address uint16 = mem.readWord(reg.pc)
+		reg.a = mem.readByte(address)
 	case 0xfb:
 		//not implemented
 	case 0xfc:
