@@ -393,39 +393,35 @@ func (reg *Register) cpn(value byte) {
 
 func (reg *Register) incn(register string) {
 	var result uint16
-	switch register {
-	case "A":
-		result = uint16(reg.a) + 1
-		reg.a = byte(result)
-	case "B":
-		result = uint16(reg.b) + 1
-		reg.b = byte(result)
-	case "C":
-		result = uint16(reg.c) + 1
-		reg.c = byte(result)
-	case "D":
-		result = uint16(reg.d) + 1
-		reg.d = byte(result)
-	case "E":
-		result = uint16(reg.e) + 1
-		reg.e = byte(result)
-	case "H":
-		result = uint16(reg.h) + 1
-		reg.h = byte(result)
-	case "L":
-		result = uint16(reg.l) + 1
-		reg.l = byte(result)
-	}
-	// carry flag
-	if (result & 0xff00) != 0 {
-		reg.setRegisterFlag(true, 4)
+	if len(register) == 1 {
+		reg_map := map[string]*byte{
+			"A": &reg.a,
+			"B": &reg.b,
+			"C": &reg.c,
+			"D": &reg.d,
+			"E": &reg.e,
+			"H": &reg.h,
+			"L": &reg.l,
+		}
+		*reg_map[register]++
+		result = uint16(*reg_map[register])
 	} else {
-		reg.setRegisterFlag(false, 4)
+		result = reg.getHLregister()
+		result++
+		r1, r2 := separateWord(result)
+		reg.h = r1
+		reg.l = r2
 	}
 	// zero flag
+	if result == 0 {
+		reg.setRegisterFlag(true, 7)
+	} else {
+		reg.setRegisterFlag(false, 7)
+	}
+	// N flag
 	reg.setRegisterFlag(false, 6)
 	// half carry flag
-	if (uint16(reg.a&0x0f) + result&0x000f) > 0x0f {
+	if (((byte(result) - 1) & 0x0f) + 1) > 0x0f {
 		reg.setRegisterFlag(true, 5)
 	} else {
 		reg.setRegisterFlag(false, 5)
@@ -433,31 +429,36 @@ func (reg *Register) incn(register string) {
 }
 
 func (reg *Register) decn(register string) {
-	var result byte
-	switch register {
-	case "A":
-		result = reg.a
-	case "B":
-		result = reg.b
-	case "C":
-		result = reg.a
-	case "D":
-		result = reg.d
-	case "E":
-		result = reg.e
-	case "H":
-		result = reg.h
-	case "L":
-		result = reg.l
+	var result uint16
+	if len(register) == 1 {
+		reg_map := map[string]*byte{
+			"A": &reg.a,
+			"B": &reg.b,
+			"C": &reg.c,
+			"D": &reg.d,
+			"E": &reg.e,
+			"H": &reg.h,
+			"L": &reg.l,
+		}
+		*reg_map[register]--
+		result = uint16(*reg_map[register])
+	} else {
+		result = reg.getHLregister()
+		result--
+		r1, r2 := separateWord(result)
+		reg.h = r1
+		reg.l = r2
 	}
-	// negative flag
-	reg.setRegisterFlag(true, 6)
 	// zero flag
 	if result == 0 {
 		reg.setRegisterFlag(true, 7)
+	} else {
+		reg.setRegisterFlag(false, 7)
 	}
+	// N flag
+	reg.setRegisterFlag(true, 6)
 	// half carry flag
-	if (result & 0x0f) == 0 {
+	if (((byte(result) + 1) & 0x0f) - 1) > 0x0f {
 		reg.setRegisterFlag(true, 5)
 	} else {
 		reg.setRegisterFlag(false, 5)
