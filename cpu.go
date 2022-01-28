@@ -328,13 +328,9 @@ func (reg *Register) addcAn(value byte) {
 }
 
 func (reg *Register) subn(value byte) {
-	result := uint16(reg.a) - uint16(value)
+	result := reg.a - value
 	// negative flag
-	if result < 0 {
-		reg.setRegisterFlag(true, 6)
-	} else {
-		reg.setRegisterFlag(false, 6)
-	}
+	reg.setRegisterFlag(true, 6)
 	// zero flag
 	if result == 0 {
 		reg.setRegisterFlag(true, 7)
@@ -346,12 +342,12 @@ func (reg *Register) subn(value byte) {
 		reg.setRegisterFlag(false, 5)
 	}
 	// carry flag
-	if (result & 0xFF00) != 0 {
+	if reg.a < value {
 		reg.setRegisterFlag(true, 4)
 	} else {
 		reg.setRegisterFlag(false, 4)
 	}
-	reg.a = byte(result & 0xFF)
+	reg.a = result
 }
 
 func (reg *Register) sbcAn(value byte) {
@@ -454,51 +450,34 @@ func (reg *Register) incn(register string) {
 }
 
 func (reg *Register) decn(register string) {
-	var result int16
+	var result byte
 	switch register {
 	case "A":
-		result = int16(reg.a) - 1
-		reg.a = byte(result)
+		result = reg.a
 	case "B":
-		result = int16(reg.a) - 1
-		reg.b = byte(result)
+		result = reg.b
 	case "C":
-		result = int16(reg.a) - 1
-		reg.c = byte(result)
+		result = reg.a
 	case "D":
-		result = int16(reg.a) - 1
-		reg.d = byte(result)
+		result = reg.d
 	case "E":
-		result = int16(reg.a) - 1
-		reg.e = byte(result)
+		result = reg.e
 	case "H":
-		result = int16(reg.a) - 1
-		reg.h = byte(result)
+		result = reg.h
 	case "L":
-		result = int16(reg.a) - 1
-		reg.l = byte(result)
+		result = reg.l
 	}
 	// negative flag
-	if result < 0 {
-		reg.setRegisterFlag(true, 6)
-	} else {
-		reg.setRegisterFlag(false, 6)
-	}
+	reg.setRegisterFlag(true, 6)
 	// zero flag
 	if result == 0 {
 		reg.setRegisterFlag(true, 7)
 	}
 	// half carry flag
-	if (int16(reg.a&0x0f) + result&0x000f) > 0x0f {
+	if (result & 0x0f) == 0 {
 		reg.setRegisterFlag(true, 5)
 	} else {
 		reg.setRegisterFlag(false, 5)
-	}
-	// carry flag
-	if (int32(result) & 0xff00) != 0 {
-		reg.setRegisterFlag(true, 4)
-	} else {
-		reg.setRegisterFlag(false, 4)
 	}
 }
 
@@ -508,7 +487,7 @@ func (reg *Register) decn(register string) {
 
 func (reg *Register) addHLn(value uint16) {
 	var result uint32
-	HL := uint16(reg.h)<<8 + uint16(reg.l)
+	HL := concatenateBytes(reg.h, reg.l)
 	result = uint32(HL) + uint32(value)
 	// negative flag
 	reg.setRegisterFlag(false, 6)
