@@ -1988,7 +1988,7 @@ func (reg *Register) executeCb(opcode byte) {
 	case 0x0e:
 		reg.rrcn("HL")
 	case 0x0f:
-		reg.rrcA()
+		reg.rrcn("A")
 	case 0x10:
 		reg.rln("B")
 	case 0x11:
@@ -2004,7 +2004,7 @@ func (reg *Register) executeCb(opcode byte) {
 	case 0x16:
 		reg.rln("HL")
 	case 0x17:
-		reg.rlA()
+		reg.rln("A")
 	case 0x18:
 		reg.rrn("B")
 	case 0x19:
@@ -2020,7 +2020,7 @@ func (reg *Register) executeCb(opcode byte) {
 	case 0x1e:
 		reg.rrn("HL")
 	case 0x1f:
-		reg.rrA()
+		reg.rrn("A")
 	case 0x20:
 		reg.slan("B")
 	case 0x21:
