@@ -1,8 +1,6 @@
 package main
 
 import (
-	//"fmt"
-	"bytes"
 	"os"
 )
 
@@ -38,9 +36,8 @@ func (mem Memory) readByte(address uint16) byte {
 }
 
 func (mem Memory) readWord(address uint16) uint16 {
-	data := [][]byte{{mem.readByte(address)},
-		{mem.readByte(address + 1)}}
-	return uint16(bytes.Join(data, nil)[0])
+	data := concatenateBytes(mem.readByte(address), mem.readByte(address+1))
+	return data
 }
 
 func (mem *Memory) writeByte(address uint16, value byte) {
@@ -62,8 +59,9 @@ func (mem *Memory) writeByte(address uint16, value byte) {
 }
 
 func (mem *Memory) writeWord(address uint16, value uint16) {
-	mem.writeByte(address, byte(value&0x00FF))
-	mem.writeByte(address+1, byte((value&0xFF00)>>8))
+	r1, r2 := separateWord(value)
+	mem.writeByte(address, r1)
+	mem.writeByte(address+1, r2)
 }
 
 func (mem *Memory) loadRom(f string) {

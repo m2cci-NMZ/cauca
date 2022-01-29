@@ -149,35 +149,31 @@ func (reg *Register) ldCA(mem *Memory) {
 }
 
 func (reg *Register) lddAHL(mem *Memory) {
-	address := (uint16(reg.h) << 8) + uint16(reg.l)
+	address := concatenateBytes(reg.h, reg.l)
 	reg.a = mem.readByte(address)
 	address--
-	reg.h = byte(address >> 8)
-	reg.l = byte(address)
+	reg.h, reg.l = separateWord(address)
 }
 
 func (reg *Register) lddHLA(mem *Memory) {
-	address := (uint16(reg.h) << 8) + uint16(reg.l)
+	address := concatenateBytes(reg.h, reg.l)
 	mem.io[address] = reg.a
 	address--
-	reg.h = byte(address >> 8)
-	reg.l = byte(address)
+	reg.h, reg.l = separateWord(address)
 }
 
 func (reg *Register) ldiAHL(mem *Memory) {
-	address := (uint16(reg.h) << 8) + uint16(reg.l)
+	address := concatenateBytes(reg.h, reg.l)
 	reg.a = mem.readByte(address)
 	address++
-	reg.h = byte(address >> 8)
-	reg.l = byte(address)
+	reg.h, reg.l = separateWord(address)
 }
 
 func (reg *Register) ldiHLA(mem *Memory) {
-	address := (uint16(reg.h) << 8) + uint16(reg.l)
+	address := concatenateBytes(reg.h, reg.l)
 	mem.writeByte(address, reg.a)
 	address++
-	reg.h = byte(address >> 8)
-	reg.l = byte(address)
+	reg.h, reg.l = separateWord(address)
 }
 
 func (reg *Register) ldhnA(value byte, mem *Memory) {
@@ -1242,7 +1238,7 @@ func (reg *Register) jpccnn(destination uint16, condition string) {
 }
 
 func (reg *Register) jpHL() {
-	HL := (uint16(reg.h) << 8) + uint16(reg.l)
+	HL := concatenateBytes(reg.h, reg.l)
 	reg.pc = HL
 }
 
@@ -1333,6 +1329,7 @@ func (reg *Register) retcc(mem *Memory, condition string) {
 }
 
 func (reg *Register) execute(opcode byte, mem *Memory) {
+	reg.pc++
 	switch opcode {
 	case 0x00:
 		//nop
@@ -1956,6 +1953,7 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 }
 
 func (reg *Register) executeCb(opcode byte) {
+	reg.pc++
 	switch opcode {
 	case 0x00:
 		reg.rlcn("B")
