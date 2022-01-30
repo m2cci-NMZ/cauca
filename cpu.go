@@ -17,21 +17,25 @@ type Register struct {
 /* Helper functions                        */
 /* *************************************** */
 
+// Takes a and b and concatenates them to return a 16 bit word
 func concatenateBytes(a byte, b byte) uint16 {
 	result := (uint16(a) << 8) + uint16(b)
 	return result
 }
 
+// Separates value and returns the two bytes.
 func separateWord(value uint16) (byte, byte) {
 	a := byte(value >> 8)
 	b := byte(value)
 	return a, b
 }
 
+// Returns the HL register, which is a 16 bit combination from registers H and L
 func (reg *Register) getHLregister() uint16 {
 	return concatenateBytes(reg.h, reg.l)
 }
 
+// Sets registers H and L by separating value
 func (reg *Register) setHLregisters(value uint16) {
 	a, b := separateWord(value)
 	reg.h = a
@@ -42,6 +46,7 @@ func (reg *Register) setHLregisters(value uint16) {
 /* Flags setting function                  */
 /* *************************************** */
 
+// Sets bit at position of F register to value
 func (register *Register) setRegisterFlag(value bool, position byte) {
 	if value {
 		register.flags |= (1 << position)
@@ -50,6 +55,7 @@ func (register *Register) setRegisterFlag(value bool, position byte) {
 	}
 }
 
+// Returns the value of bit pos in n
 func hasBit(n uint16, pos uint16) bool {
 	val := n & (1 << pos)
 	return (val > 0)
@@ -59,6 +65,7 @@ func hasBit(n uint16, pos uint16) bool {
 /* 8 bit loads                             */
 /* *************************************** */
 
+// Loads value in register destination
 func (reg *Register) ldnnn(value byte, destination string) {
 	switch destination {
 	case "B":
@@ -76,6 +83,7 @@ func (reg *Register) ldnnn(value byte, destination string) {
 	}
 }
 
+// Loads register source in register destination. For 16 bit registers, read memory instead.
 func (reg *Register) ldr1r2(destination string, source string, mem *Memory) {
 	reg_map := map[string]*byte{
 		"A": &(reg.a),
@@ -87,16 +95,21 @@ func (reg *Register) ldr1r2(destination string, source string, mem *Memory) {
 		"L": &(reg.l),
 	}
 	if source == "HL" {
-		*(reg_map[destination]) = mem.readByte(concatenateBytes(reg.h, reg.l))
+		*(reg_map[destination]) = mem.readByte(reg.getHLregister())
 	} else if destination == "HL" {
-		value := mem.readWord(uint16(*(reg_map[source])))
-		reg.h = byte(value & 0xff00)
-		reg.l = byte(value & 0x00ff)
+		if len(source) == 1 {
+			value := mem.readWord(uint16(*(reg_map[source])))
+			reg.setHLregisters(value)
+		} else {
+			value := mem.readWord(reg.pc)
+			reg.setHLregisters(value)
+		}
 	} else {
-		*(reg_map[destination]) = mem.readByte(uint16(*(reg_map[source])))
+		*(reg_map[destination]) = *(reg_map[source])
 	}
 }
 
+// Loads value at memory address source and put it in register A
 func (reg *Register) ldAn(source string, mem *Memory) {
 	reg_map := map[string]uint16{
 		"A":  uint16(reg.a),
@@ -114,6 +127,7 @@ func (reg *Register) ldAn(source string, mem *Memory) {
 	reg.a = mem.readByte(reg_map[source])
 }
 
+// Loads value od register source in register A
 func (reg *Register) ldnA(source string, mem *Memory) {
 	reg_map := map[string]byte{
 		"A": reg.a,
@@ -140,14 +154,17 @@ func (reg *Register) ldnA(source string, mem *Memory) {
 	}
 }
 
+// Load value in the io memory bank at address in register C on register A
 func (reg *Register) ldAC(mem *Memory) {
 	reg.a = mem.io[reg.c]
 }
 
+// Load value in register A in io memory bank at address in register C
 func (reg *Register) ldCA(mem *Memory) {
 	mem.io[reg.c] = reg.a
 }
 
+// Load value at address HL in register A and decrement HL
 func (reg *Register) lddAHL(mem *Memory) {
 	address := concatenateBytes(reg.h, reg.l)
 	reg.a = mem.readByte(address)
@@ -155,6 +172,7 @@ func (reg *Register) lddAHL(mem *Memory) {
 	reg.h, reg.l = separateWord(address)
 }
 
+// Loads value in register A in address HL and decrement HL
 func (reg *Register) lddHLA(mem *Memory) {
 	address := concatenateBytes(reg.h, reg.l)
 	mem.io[address] = reg.a
@@ -162,6 +180,7 @@ func (reg *Register) lddHLA(mem *Memory) {
 	reg.h, reg.l = separateWord(address)
 }
 
+// Load value at address HL in register A and increment HL
 func (reg *Register) ldiAHL(mem *Memory) {
 	address := concatenateBytes(reg.h, reg.l)
 	reg.a = mem.readByte(address)
@@ -169,6 +188,7 @@ func (reg *Register) ldiAHL(mem *Memory) {
 	reg.h, reg.l = separateWord(address)
 }
 
+// Loads value in register A in address HL and increment HL
 func (reg *Register) ldiHLA(mem *Memory) {
 	address := concatenateBytes(reg.h, reg.l)
 	mem.writeByte(address, reg.a)
@@ -176,10 +196,12 @@ func (reg *Register) ldiHLA(mem *Memory) {
 	reg.h, reg.l = separateWord(address)
 }
 
+// Load value in register A in io memory bank at address value
 func (reg *Register) ldhnA(value byte, mem *Memory) {
 	mem.io[value] = reg.a
 }
 
+// Load value in io memory bank at address value in register A
 func (reg *Register) ldhAn(value byte, mem *Memory) {
 	reg.a = mem.io[value]
 }
@@ -188,6 +210,7 @@ func (reg *Register) ldhAn(value byte, mem *Memory) {
 /* 16 bit loads                            */
 /* *************************************** */
 
+// Loads value in 16 bit register destination
 func (reg *Register) ldnnn16(value uint16, destination string) {
 	r1, r2 := separateWord(value)
 	switch destination {
@@ -205,11 +228,13 @@ func (reg *Register) ldnnn16(value uint16, destination string) {
 	}
 }
 
+// Load HL register in PC
 func (reg *Register) ldSPHL() {
 	value := reg.getHLregister()
 	reg.sp = value
 }
 
+// Load SP+value into HL
 func (reg *Register) ldHLSPn(value byte) {
 	result := uint16(value) + reg.sp
 	r1, r2 := separateWord(result)
@@ -233,10 +258,12 @@ func (reg *Register) ldHLSPn(value byte) {
 	}
 }
 
+// Load SP at value address
 func (reg *Register) ldnnSP(value uint16, mem *Memory) {
 	mem.writeWord(value, reg.sp)
 }
 
+// Push pair of registers on top of stack and dercrement stack twice
 func (reg *Register) pushnn(registers string, mem *Memory) {
 	var value uint16
 	switch registers {
@@ -256,6 +283,7 @@ func (reg *Register) pushnn(registers string, mem *Memory) {
 	reg.sp = reg.sp - 2
 }
 
+// Pop 16 bits on top of the stack and put in pair of registers and increment SP twice
 func (reg *Register) popnn(registers string, mem *Memory) {
 	r1 := mem.readByte(reg.sp)
 	r2 := mem.readByte(reg.sp + 1)
@@ -280,6 +308,7 @@ func (reg *Register) popnn(registers string, mem *Memory) {
 /* 8 bit ALU                               */
 /* *************************************** */
 
+// Add value to register A
 func (reg *Register) addAn(value byte) {
 	result := uint16(reg.a) + uint16(value)
 	// carry flag
@@ -299,6 +328,7 @@ func (reg *Register) addAn(value byte) {
 	reg.a = byte(result & 0xFF)
 }
 
+// Add value to register A and adjust carry
 func (reg *Register) addcAn(value byte) {
 	if hasBit(uint16(reg.flags), 4) {
 		value++
@@ -306,6 +336,7 @@ func (reg *Register) addcAn(value byte) {
 	reg.addAn(value)
 }
 
+// Subtract value from register A
 func (reg *Register) subn(value byte) {
 	result := reg.a - value
 	// negative flag
@@ -329,6 +360,7 @@ func (reg *Register) subn(value byte) {
 	reg.a = result
 }
 
+// Subtract value from register A and carry correct
 func (reg *Register) sbcAn(value byte) {
 	if hasBit(uint16(reg.flags), 4) {
 		value--
@@ -336,6 +368,7 @@ func (reg *Register) sbcAn(value byte) {
 	reg.subn(value)
 }
 
+// Perform bitwise AND of value with register A
 func (reg *Register) andn(value byte) {
 	result := reg.a & value
 	// zero flag
@@ -351,6 +384,7 @@ func (reg *Register) andn(value byte) {
 	reg.a = result
 }
 
+// Perform bitwise OR of value with register A
 func (reg *Register) orn(value byte) {
 	result := reg.a | value
 	// zero flag
@@ -366,6 +400,7 @@ func (reg *Register) orn(value byte) {
 	reg.a = result
 }
 
+// Perform bitwise XOR of value with register A
 func (reg *Register) xorn(value byte) {
 	result := reg.a ^ value
 	// zero flag
@@ -381,12 +416,14 @@ func (reg *Register) xorn(value byte) {
 	reg.a = result
 }
 
+// Compare register A with value and set flags
 func (reg *Register) cpn(value byte) {
 	tmp := reg.a
 	reg.subn(value)
 	reg.a = tmp
 }
 
+// Increment register
 func (reg *Register) incn(register string) {
 	var result uint16
 	if len(register) == 1 {
@@ -424,6 +461,7 @@ func (reg *Register) incn(register string) {
 	}
 }
 
+// Decrement register
 func (reg *Register) decn(register string) {
 	var result uint16
 	if len(register) == 1 {
@@ -465,6 +503,7 @@ func (reg *Register) decn(register string) {
 /* 16 bit ALU                               */
 /* *************************************** */
 
+// Add value to register HL
 func (reg *Register) addHLn(value uint16) {
 	var result uint32
 	HL := concatenateBytes(reg.h, reg.l)
@@ -487,6 +526,7 @@ func (reg *Register) addHLn(value uint16) {
 	reg.l = byte(result)
 }
 
+// Add value to register SP
 func (reg *Register) addSPn(value uint16) {
 	result := uint32(reg.sp) + uint32(value)
 	// zero flag
@@ -508,6 +548,7 @@ func (reg *Register) addSPn(value uint16) {
 	reg.sp = uint16(result)
 }
 
+// Increment register
 func (reg *Register) incnn(register string) {
 	switch register {
 	case "BC":
@@ -524,6 +565,7 @@ func (reg *Register) incnn(register string) {
 	}
 }
 
+// Decrement register
 func (reg *Register) decnn(register string) {
 	switch register {
 	case "BC":
@@ -544,6 +586,7 @@ func (reg *Register) decnn(register string) {
 /* misc                                    */
 /* *************************************** */
 
+// Swap upper and lower nibbles of register
 func (reg *Register) swapn(register string) {
 	var value byte
 	switch register {
@@ -596,6 +639,7 @@ func (reg *Register) swapn(register string) {
 	reg.setRegisterFlag(false, 4)
 }
 
+// BCD adjust register A
 func (reg *Register) dAA() {
 	var value uint16
 	value = uint16(reg.a)
@@ -629,6 +673,7 @@ func (reg *Register) dAA() {
 	reg.a = byte(value)
 }
 
+// Complement register A
 func (reg *Register) cpl() {
 	reg.a = ^reg.a
 	// negative flag
@@ -637,6 +682,7 @@ func (reg *Register) cpl() {
 	reg.setRegisterFlag(true, 5)
 }
 
+// Complement carry flag
 func (reg *Register) ccf() {
 	if hasBit(uint16(reg.flags), 4) {
 		reg.setRegisterFlag(false, 4)
@@ -649,6 +695,7 @@ func (reg *Register) ccf() {
 	reg.setRegisterFlag(false, 5)
 }
 
+// Set carry flag
 func (reg *Register) scf() {
 	// carry flag
 	reg.setRegisterFlag(true, 4)
@@ -662,7 +709,7 @@ func (reg *Register) scf() {
 /* rotates and shifts                      */
 /* *************************************** */
 
-// this is VERY tricky, maybe worth writing unit tests
+// Rotate register A left
 func (reg *Register) rlA() {
 	value := uint16(reg.a) << 1
 	if hasBit(uint16(reg.flags), 4) {
@@ -687,6 +734,7 @@ func (reg *Register) rlA() {
 	reg.a = byte(value)
 }
 
+// Rotate register A left through carry flag
 func (reg *Register) rlcA() {
 	value := uint16(reg.a) << 1
 	//zero flag
@@ -708,6 +756,7 @@ func (reg *Register) rlcA() {
 	reg.a = byte(value)
 }
 
+// Rotate register A right
 func (reg *Register) rrA() {
 	value := uint16(reg.a) >> 1
 	if hasBit(uint16(reg.flags), 4) {
@@ -733,6 +782,7 @@ func (reg *Register) rrA() {
 	reg.a = byte(value)
 }
 
+// Rotate register A right through carry flag
 func (reg *Register) rrcA() {
 	value := uint16(reg.a) >> 1
 	//zero flag
@@ -754,6 +804,7 @@ func (reg *Register) rrcA() {
 	reg.a = byte(value)
 }
 
+// Rotate register destination left
 func (reg *Register) rln(destination string) {
 	var register byte
 	switch destination {
@@ -810,6 +861,7 @@ func (reg *Register) rln(destination string) {
 	}
 }
 
+// Rotate register destination left thorugh carry
 func (reg *Register) rlcn(destination string) {
 	var register byte
 	switch destination {
@@ -863,6 +915,7 @@ func (reg *Register) rlcn(destination string) {
 	}
 }
 
+// Rotate register destination right through carry
 func (reg *Register) rrcn(destination string) {
 	var register byte
 	switch destination {
@@ -915,6 +968,8 @@ func (reg *Register) rrcn(destination string) {
 		reg.l = byte(value)
 	}
 }
+
+// Rotate register destination right.
 func (reg *Register) rrn(destination string) {
 	var register byte
 	switch destination {
@@ -972,6 +1027,7 @@ func (reg *Register) rrn(destination string) {
 	}
 }
 
+// Shift register destination left
 func (reg *Register) slan(destination string) {
 	var register byte
 	switch destination {
@@ -1027,6 +1083,7 @@ func (reg *Register) slan(destination string) {
 	}
 }
 
+// Shift register destination right
 func (reg *Register) sran(destination string) {
 	var register byte
 	switch destination {
@@ -1083,6 +1140,7 @@ func (reg *Register) sran(destination string) {
 	}
 }
 
+// Shift register destination right
 func (reg *Register) srln(destination string) {
 	var register byte
 	switch destination {
@@ -1142,6 +1200,7 @@ func (reg *Register) srln(destination string) {
 /* Bit opcodes                             */
 /* *************************************** */
 
+// Set zero flag to register destination bit at position pos
 func (reg *Register) bitBr(destination string, pos uint16) {
 	var test bool
 	switch destination {
@@ -1168,6 +1227,7 @@ func (reg *Register) bitBr(destination string, pos uint16) {
 	reg.setRegisterFlag(true, 5)
 }
 
+// Set bit at position pos in register destination
 func (reg *Register) setBr(destination string, pos uint16) {
 	var mask byte = 1
 	switch destination {
@@ -1188,6 +1248,7 @@ func (reg *Register) setBr(destination string, pos uint16) {
 	}
 }
 
+// reset bit at position pos in register destination
 func (reg *Register) resBr(destination string, pos uint16) {
 	var mask byte = 1
 	switch destination {
@@ -1212,10 +1273,12 @@ func (reg *Register) resBr(destination string, pos uint16) {
 /* Jumps                                   */
 /* *************************************** */
 
+// Jump at address destination
 func (reg *Register) jpnn(destination uint16) {
 	reg.pc = destination
 }
 
+// Jump at address destination if NZ flags
 func (reg *Register) jpccnn(destination uint16, condition string) {
 	switch condition {
 	case "NZ":
@@ -1237,15 +1300,18 @@ func (reg *Register) jpccnn(destination uint16, condition string) {
 	}
 }
 
+// Jump at address HL
 func (reg *Register) jpHL() {
 	HL := concatenateBytes(reg.h, reg.l)
 	reg.pc = HL
 }
 
+// Add n to PC
 func (reg *Register) jrn(n uint16) {
 	reg.pc += n
 }
 
+// Add n to PC if NZ flags
 func (reg *Register) jrccn(n uint16, condition string) {
 	switch condition {
 	case "NZ":
@@ -1271,12 +1337,14 @@ func (reg *Register) jrccn(n uint16, condition string) {
 /* Calls                                   */
 /* *************************************** */
 
+// Push address of next instruction on top of stack and jump to destination
 func (reg *Register) callnn(destination uint16, mem *Memory) {
 	mem.writeWord(reg.sp, reg.pc+1)
 	reg.sp += 2
 	reg.pc = destination
 }
 
+// Push address of next instruction on top of stack and jump to destination if condition
 func (reg *Register) callccnn(n uint16, condition string, mem *Memory) {
 	switch condition {
 	case "NZ":
@@ -1310,12 +1378,14 @@ func (reg *Register) callccnn(n uint16, condition string, mem *Memory) {
 /* Returns                                 */
 /* *************************************** */
 
+// Pop value from stack and jump
 func (reg *Register) ret(mem *Memory) {
 	address := mem.readWord(reg.sp)
 	reg.pc = address
 	reg.sp += 2
 }
 
+// Pop value from stack and jump if condition
 func (reg *Register) retcc(mem *Memory, condition string) {
 	if condition == "NZ" && !hasBit(uint16(reg.flags), 7) {
 		reg.ret(mem)
@@ -1328,6 +1398,7 @@ func (reg *Register) retcc(mem *Memory, condition string) {
 	}
 }
 
+// Execute opcode
 func (reg *Register) execute(opcode byte, mem *Memory) {
 	reg.pc++
 	switch opcode {
