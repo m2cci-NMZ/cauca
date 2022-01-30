@@ -1405,7 +1405,7 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 	case 0x00:
 		//nop
 	case 0x01:
-		reg.ldnnn16(mem.readWord(reg.pc), "BC")
+		reg.ldnnn16(reg.pc, "BC")
 	case 0x02:
 		reg.ldnA("BC", mem)
 	case 0x03:
@@ -1441,8 +1441,7 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 	case 0x10:
 		//stop
 	case 0x11:
-		value := mem.readWord(reg.pc)
-		reg.ldnnn16(value, "DE")
+		reg.ldnnn16(reg.pc, "DE")
 	case 0x12:
 		reg.ldnA("DE", mem)
 	case 0x13:
@@ -1479,8 +1478,7 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 		value := mem.readWord(reg.pc)
 		reg.jrccn(value, "NZ")
 	case 0x21:
-		value := mem.readWord(reg.pc)
-		reg.ldnnn16(value, "HL")
+		reg.ldnnn16(reg.pc, "HL")
 	case 0x22:
 		reg.ldiHLA(mem)
 	case 0x23:
@@ -1517,8 +1515,7 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 		value := mem.readWord(reg.pc)
 		reg.jrccn(value, "NC")
 	case 0x31:
-		value := mem.readWord(reg.sp)
-		reg.ldnnn16(value, "SP")
+		reg.ldnnn16(reg.pc, "SP")
 	case 0x32:
 		reg.ldiHLA(mem)
 	case 0x33:
@@ -1528,8 +1525,7 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 	case 0x35:
 		reg.decnn("HL")
 	case 0x36:
-		value := mem.readWord(reg.pc)
-		reg.ldnnn16(value, "HL")
+		reg.ldnnn16(reg.pc, "HL")
 	case 0x37:
 		reg.scf()
 	case 0x38:
