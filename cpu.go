@@ -19,14 +19,14 @@ type Register struct {
 
 // Takes a and b and concatenates them to return a 16 bit word
 func concatenateBytes(a byte, b byte) uint16 {
-	result := (uint16(a) << 8) + uint16(b)
+	result := (uint16(b) << 8) + uint16(a)
 	return result
 }
 
 // Separates value and returns the two bytes.
 func separateWord(value uint16) (byte, byte) {
-	a := byte(value >> 8)
-	b := byte(value)
+	b := byte(value >> 8)
+	a := byte(value)
 	return a, b
 }
 
