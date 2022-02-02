@@ -1,15 +1,34 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
 func main() {
 	var memory Memory
 	var cpu Register
 	memory.loadRom("roms/tetris")
-	var i uint16 = 0
-	for i < 1000 {
+	var i int = 0
+	cpu.a = 0x01
+	cpu.flags = 0xb0
+	cpu.c = 0x13
+	cpu.e = 0xd8
+	cpu.h = 0x01
+	cpu.l = 0x4d
+	cpu.sp = 0xfffe
+	cpu.pc = 0x100
+	for i < 1000000 {
 		cpu.execute(memory.readByte(cpu.pc), &memory)
+		if cpu.pc == 0x282a {
+			var tmp []byte
+			tmp = memory.vram[:]
+			os.WriteFile("tile.bin", tmp, 0)
+		}
+		//if cpu.pc > 10280 && cpu.pc < 10284 {
+		fmt.Print(cpu.pc, "\n")
+		//}
 		i++
 	}
-	fmt.Print(memory.readByte(cpu.pc))
+	fmt.Print(cpu.pc)
 }

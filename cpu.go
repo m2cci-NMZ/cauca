@@ -51,14 +51,14 @@ func separateWord(value uint16) (byte, byte) {
 
 // Returns the HL register, which is a 16 bit combination from registers H and L
 func (reg *Register) getHLregister() uint16 {
-	return concatenateBytes(reg.h, reg.l)
+	return concatenateBytes(reg.l, reg.h)
 }
 
 // Sets registers H and L by separating value
 func (reg *Register) setHLregisters(value uint16) {
 	a, b := separateWord(value)
-	reg.h = a
-	reg.l = b
+	reg.h = b
+	reg.l = a
 }
 
 /* *************************************** */
@@ -185,34 +185,34 @@ func (reg *Register) ldCA(mem *Memory) {
 
 // Load value at address HL in register A and decrement HL
 func (reg *Register) lddAHL(mem *Memory) {
-	address := concatenateBytes(reg.h, reg.l)
+	address := reg.getHLregister()
 	reg.a = mem.readByte(address)
 	address--
-	reg.h, reg.l = separateWord(address)
+	reg.setHLregisters(address)
 }
 
 // Loads value in register A in address HL and decrement HL
 func (reg *Register) lddHLA(mem *Memory) {
-	address := concatenateBytes(reg.h, reg.l)
-	mem.io[address] = reg.a
+	address := reg.getHLregister()
+	mem.writeByte(address, reg.a)
 	address--
-	reg.h, reg.l = separateWord(address)
+	reg.setHLregisters(address)
 }
 
 // Load value at address HL in register A and increment HL
 func (reg *Register) ldiAHL(mem *Memory) {
-	address := concatenateBytes(reg.h, reg.l)
+	address := reg.getHLregister()
 	reg.a = mem.readByte(address)
 	address++
-	reg.h, reg.l = separateWord(address)
+	reg.setHLregisters(address)
 }
 
 // Loads value in register A in address HL and increment HL
 func (reg *Register) ldiHLA(mem *Memory) {
-	address := concatenateBytes(reg.h, reg.l)
+	address := reg.getHLregister()
 	mem.writeByte(address, reg.a)
 	address++
-	reg.h, reg.l = separateWord(address)
+	reg.setHLregisters(address)
 }
 
 // Load value in register A in io memory bank at address value
@@ -231,7 +231,7 @@ func (reg *Register) ldhAn(value byte, mem *Memory) {
 
 // Loads value in 16 bit register destination
 func (reg *Register) ldnnn16(value uint16, destination string) {
-	r1, r2 := separateWord(value)
+	r2, r1 := separateWord(value)
 	switch destination {
 	case "BC":
 		reg.b = r1
@@ -256,9 +256,7 @@ func (reg *Register) ldSPHL() {
 // Load SP+value into HL
 func (reg *Register) ldHLSPn(value byte) {
 	result := uint16(value) + reg.sp
-	r1, r2 := separateWord(result)
-	reg.h = r1
-	reg.l = r2
+	reg.setHLregisters(uint16(value))
 	// reset Z flag
 	reg.setRegisterFlag(false, 7)
 	// reset N flag
@@ -287,12 +285,12 @@ func (reg *Register) pushnn(registers string, mem *Memory) {
 	var value uint16
 	switch registers {
 	case "AF":
-		value = concatenateBytes(reg.a, reg.flags)
+		value = concatenateBytes(reg.flags, reg.a)
 	case "BC":
-		value = concatenateBytes(reg.b, reg.c)
+		value = concatenateBytes(reg.c, reg.b)
 
 	case "DE":
-		value = concatenateBytes(reg.d, reg.e)
+		value = concatenateBytes(reg.e, reg.d)
 
 	case "HL":
 		value = reg.getHLregister()
@@ -460,9 +458,7 @@ func (reg *Register) incn(register string) {
 	} else {
 		result = reg.getHLregister()
 		result++
-		r1, r2 := separateWord(result)
-		reg.h = r1
-		reg.l = r2
+		reg.setHLregisters(result)
 	}
 	// zero flag
 	if result == 0 {
@@ -498,9 +494,7 @@ func (reg *Register) decn(register string) {
 	} else {
 		result = reg.getHLregister()
 		result--
-		r1, r2 := separateWord(result)
-		reg.h = r1
-		reg.l = r2
+		reg.setHLregisters(result)
 	}
 	// zero flag
 	if result == 0 {
@@ -525,7 +519,7 @@ func (reg *Register) decn(register string) {
 // Add value to register HL
 func (reg *Register) addHLn(value uint16) {
 	var result uint32
-	HL := concatenateBytes(reg.h, reg.l)
+	HL := reg.getHLregister()
 	result = uint32(HL) + uint32(value)
 	// negative flag
 	reg.setRegisterFlag(false, 6)
@@ -541,8 +535,7 @@ func (reg *Register) addHLn(value uint16) {
 	} else {
 		reg.setRegisterFlag(false, 5)
 	}
-	reg.h = byte(result >> 8)
-	reg.l = byte(result)
+	reg.setHLregisters(uint16(result))
 }
 
 // Add value to register SP
@@ -571,14 +564,14 @@ func (reg *Register) addSPn(value uint16) {
 func (reg *Register) incnn(register string) {
 	switch register {
 	case "BC":
-		result := concatenateBytes(reg.b, reg.c) + 1
-		reg.b, reg.c = separateWord(result)
+		result := concatenateBytes(reg.c, reg.b) + 1
+		reg.c, reg.b = separateWord(result)
 	case "DE":
-		result := concatenateBytes(reg.d, reg.e) + 1
-		reg.d, reg.e = separateWord(result)
+		result := concatenateBytes(reg.e, reg.d) + 1
+		reg.e, reg.d = separateWord(result)
 	case "HL":
-		result := concatenateBytes(reg.h, reg.l) + 1
-		reg.h, reg.l = separateWord(result)
+		result := concatenateBytes(reg.l, reg.h) + 1
+		reg.l, reg.h = separateWord(result)
 	case "SP":
 		reg.sp++
 	}
@@ -588,14 +581,14 @@ func (reg *Register) incnn(register string) {
 func (reg *Register) decnn(register string) {
 	switch register {
 	case "BC":
-		result := concatenateBytes(reg.b, reg.c) - 1
-		reg.b, reg.c = separateWord(result)
+		result := concatenateBytes(reg.c, reg.b) - 1
+		reg.c, reg.b = separateWord(result)
 	case "DE":
-		result := concatenateBytes(reg.d, reg.e) - 1
-		reg.d, reg.e = separateWord(result)
+		result := concatenateBytes(reg.e, reg.d) - 1
+		reg.e, reg.d = separateWord(result)
 	case "HL":
-		result := concatenateBytes(reg.h, reg.l) - 1
-		reg.h, reg.l = separateWord(result)
+		result := concatenateBytes(reg.l, reg.h) - 1
+		reg.l, reg.h = separateWord(result)
 	case "SP":
 		reg.sp--
 	}
@@ -642,7 +635,7 @@ func (reg *Register) swapn(register string) {
 		l := reg.l
 		reg.h = l
 		reg.l = h
-		if concatenateBytes(reg.h, reg.l) != 0 {
+		if concatenateBytes(reg.l, reg.h) != 0 {
 			value = 1
 		}
 	}
@@ -1281,7 +1274,7 @@ func (reg *Register) jpccnn(destination uint16, condition string) {
 
 // Jump at address HL
 func (reg *Register) jpHL() {
-	HL := concatenateBytes(reg.h, reg.l)
+	HL := reg.getHLregister()
 	reg.pc = HL
 }
 
@@ -1291,23 +1284,23 @@ func (reg *Register) jrn(n uint16) {
 }
 
 // Add n to PC if NZ flags
-func (reg *Register) jrccn(n uint16, condition string) {
+func (reg *Register) jrccn(n byte, condition string) {
 	switch condition {
 	case "NZ":
 		if !hasBit(uint16(reg.flags), 7) {
-			reg.pc += n
+			reg.pc += uint16(n)
 		}
 	case "Z":
 		if hasBit(uint16(reg.flags), 7) {
-			reg.pc += n
+			reg.pc += uint16(n)
 		}
 	case "NC":
 		if !hasBit(uint16(reg.flags), 4) {
-			reg.pc += n
+			reg.pc += uint16(n)
 		}
 	case "C":
 		if hasBit(uint16(reg.flags), 4) {
-			reg.pc += n
+			reg.pc += uint16(n)
 		}
 	}
 }
@@ -1464,11 +1457,12 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 	case 0x1f:
 		reg.rrA()
 	case 0x20:
-		value := mem.readWord(reg.pc)
+		value := mem.readByte(reg.pc)
 		reg.jrccn(value, "NZ")
 		reg.pc++
 	case 0x21:
-		reg.ldnnn16(reg.pc, "HL")
+		value := mem.readWord(reg.pc)
+		reg.ldnnn16(value, "HL")
 		reg.pc += 2
 	case 0x22:
 		reg.ldiHLA(mem)
@@ -1513,7 +1507,7 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 		reg.ldnnn16(reg.pc, "SP")
 		reg.pc += 2
 	case 0x32:
-		reg.ldiHLA(mem)
+		reg.lddHLA(mem)
 	case 0x33:
 		reg.incnn("SP")
 	case 0x34:
@@ -1674,196 +1668,196 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 	case 0x7f:
 		reg.ldr1r2("A", "A", mem)
 	case 0x80:
-		value := mem.readByte(uint16(reg.b))
+		value := reg.b
 		reg.addAn(value)
 	case 0x81:
-		value := mem.readByte(uint16(reg.c))
+		value := reg.c
 		reg.addAn(value)
 	case 0x82:
-		value := mem.readByte(uint16(reg.d))
+		value := reg.d
 		reg.addAn(value)
 	case 0x83:
-		value := mem.readByte(uint16(reg.e))
+		value := reg.e
 		reg.addAn(value)
 	case 0x84:
-		value := mem.readByte(uint16(reg.h))
+		value := reg.h
 		reg.addAn(value)
 	case 0x85:
-		value := mem.readByte(uint16(reg.l))
+		value := reg.l
 		reg.addAn(value)
 	case 0x86:
 		value := mem.readByte(concatenateBytes(reg.h, reg.l))
 		reg.addAn(value)
 	case 0x87:
-		value := mem.readByte(uint16(reg.a))
+		value := reg.a
 		reg.addAn(value)
 	case 0x88:
-		value := mem.readByte(uint16(reg.b))
+		value := reg.b
 		reg.addcAn(value)
 	case 0x89:
-		value := mem.readByte(uint16(reg.c))
+		value := reg.c
 		reg.addcAn(value)
 	case 0x8a:
-		value := mem.readByte(uint16(reg.d))
+		value := reg.d
 		reg.addcAn(value)
 	case 0x8b:
-		value := mem.readByte(uint16(reg.e))
+		value := reg.e
 		reg.addcAn(value)
 	case 0x8c:
-		value := mem.readByte(uint16(reg.h))
+		value := reg.h
 		reg.addcAn(value)
 	case 0x8d:
-		value := mem.readByte(uint16(reg.l))
+		value := reg.l
 		reg.addcAn(value)
 	case 0x8e:
 		value := mem.readByte(concatenateBytes(reg.h, reg.l))
 		reg.addcAn(value)
 	case 0x8f:
-		value := mem.readByte(uint16(reg.a))
+		value := reg.a
 		reg.addcAn(value)
 	case 0x90:
-		value := mem.readByte(uint16(reg.b))
+		value := reg.b
 		reg.subn(value)
 	case 0x91:
-		value := mem.readByte(uint16(reg.c))
+		value := reg.c
 		reg.subn(value)
 	case 0x92:
-		value := mem.readByte(uint16(reg.d))
+		value := reg.d
 		reg.subn(value)
 	case 0x93:
-		value := mem.readByte(uint16(reg.e))
+		value := reg.e
 		reg.subn(value)
 	case 0x94:
-		value := mem.readByte(uint16(reg.h))
+		value := reg.h
 		reg.subn(value)
 	case 0x95:
-		value := mem.readByte(uint16(reg.l))
+		value := reg.l
 		reg.subn(value)
 	case 0x96:
 		value := mem.readByte(concatenateBytes(reg.h, reg.l))
 		reg.subn(value)
 	case 0x97:
-		value := mem.readByte(uint16(reg.a))
+		value := reg.a
 		reg.subn(value)
 	case 0x98:
-		value := mem.readByte(uint16(reg.b))
+		value := reg.b
 		reg.sbcAn(value)
 	case 0x99:
-		value := mem.readByte(uint16(reg.c))
+		value := reg.c
 		reg.sbcAn(value)
 	case 0x9a:
-		value := mem.readByte(uint16(reg.d))
+		value := reg.d
 		reg.sbcAn(value)
 	case 0x9b:
-		value := mem.readByte(uint16(reg.e))
+		value := reg.e
 		reg.sbcAn(value)
 	case 0x9c:
-		value := mem.readByte(uint16(reg.h))
+		value := reg.h
 		reg.sbcAn(value)
 	case 0x9d:
-		value := mem.readByte(uint16(reg.l))
+		value := reg.l
 		reg.sbcAn(value)
 	case 0x9e:
 		value := mem.readByte(concatenateBytes(reg.h, reg.l))
 		reg.sbcAn(value)
 	case 0x9f:
-		value := mem.readByte(uint16(reg.a))
+		value := reg.a
 		reg.sbcAn(value)
 	case 0xa0:
-		value := mem.readByte(uint16(reg.b))
+		value := reg.b
 		reg.andn(value)
 	case 0xa1:
-		value := mem.readByte(uint16(reg.c))
+		value := reg.c
 		reg.andn(value)
 	case 0xa2:
-		value := mem.readByte(uint16(reg.d))
+		value := reg.d
 		reg.andn(value)
 	case 0xa3:
-		value := mem.readByte(uint16(reg.e))
+		value := reg.e
 		reg.andn(value)
 	case 0xa4:
-		value := mem.readByte(uint16(reg.h))
+		value := reg.h
 		reg.andn(value)
 	case 0xa5:
-		value := mem.readByte(uint16(reg.l))
+		value := reg.l
 		reg.andn(value)
 	case 0xa6:
 		value := mem.readByte(concatenateBytes(reg.h, reg.l))
 		reg.andn(value)
 	case 0xa7:
-		value := mem.readByte(uint16(reg.a))
+		value := reg.a
 		reg.andn(value)
 	case 0xa8:
-		value := mem.readByte(uint16(reg.b))
+		value := reg.b
 		reg.xorn(value)
 	case 0xa9:
-		value := mem.readByte(uint16(reg.c))
+		value := reg.c
 		reg.xorn(value)
 	case 0xaa:
-		value := mem.readByte(uint16(reg.d))
+		value := reg.d
 		reg.xorn(value)
 	case 0xab:
-		value := mem.readByte(uint16(reg.e))
+		value := reg.e
 		reg.xorn(value)
 	case 0xac:
-		value := mem.readByte(uint16(reg.h))
+		value := reg.h
 		reg.xorn(value)
 	case 0xad:
-		value := mem.readByte(uint16(reg.l))
+		value := reg.l
 		reg.xorn(value)
 	case 0xae:
 		value := mem.readByte(concatenateBytes(reg.h, reg.l))
 		reg.xorn(value)
 	case 0xaf:
-		value := mem.readByte(uint16(reg.a))
+		value := reg.a
 		reg.xorn(value)
 	case 0xb0:
-		value := mem.readByte(uint16(reg.b))
+		value := reg.b
 		reg.orn(value)
 	case 0xb1:
-		value := mem.readByte(uint16(reg.c))
+		value := reg.c
 		reg.orn(value)
 	case 0xb2:
-		value := mem.readByte(uint16(reg.d))
+		value := reg.d
 		reg.orn(value)
 	case 0xb3:
-		value := mem.readByte(uint16(reg.e))
+		value := reg.e
 		reg.orn(value)
 	case 0xb4:
-		value := mem.readByte(uint16(reg.h))
+		value := reg.h
 		reg.orn(value)
 	case 0xb5:
-		value := mem.readByte(uint16(reg.l))
+		value := reg.l
 		reg.orn(value)
 	case 0xb6:
 		value := mem.readByte(concatenateBytes(reg.h, reg.l))
 		reg.orn(value)
 	case 0xb7:
-		value := mem.readByte(uint16(reg.a))
+		value := reg.a
 		reg.orn(value)
 	case 0xb8:
-		value := mem.readByte(uint16(reg.b))
+		value := reg.b
 		reg.cpn(value)
 	case 0xb9:
-		value := mem.readByte(uint16(reg.c))
+		value := reg.c
 		reg.cpn(value)
 	case 0xba:
-		value := mem.readByte(uint16(reg.d))
+		value := reg.d
 		reg.cpn(value)
 	case 0xbb:
-		value := mem.readByte(uint16(reg.e))
+		value := reg.e
 		reg.cpn(value)
 	case 0xbc:
-		value := mem.readByte(uint16(reg.h))
+		value := reg.h
 		reg.cpn(value)
 	case 0xbd:
-		value := mem.readByte(uint16(reg.l))
+		value := reg.l
 		reg.cpn(value)
 	case 0xbe:
 		value := mem.readByte(concatenateBytes(reg.h, reg.l))
 		reg.cpn(value)
 	case 0xbf:
-		value := mem.readByte(uint16(reg.a))
+		value := reg.a
 		reg.cpn(value)
 	case 0xc0:
 		reg.retcc(mem, "NZ")
@@ -1875,7 +1869,7 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 	case 0xc3:
 		value := mem.readWord(reg.pc)
 		reg.jpnn(value)
-		reg.pc += 2
+		//reg.pc += 2
 	case 0xc4:
 		value := mem.readWord(reg.pc)
 		reg.callccnn(value, "NZ", mem)
@@ -1895,7 +1889,7 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 	case 0xca:
 		value := mem.readWord(reg.pc)
 		reg.jpccnn(value, "Z")
-		reg.pc += 2
+		//reg.pc += 2
 	case 0xcb:
 		reg.executeCb(opcode)
 	case 0xcc:
@@ -1919,7 +1913,7 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 	case 0xd2:
 		value := mem.readWord(reg.pc)
 		reg.jpccnn(value, "NC")
-		reg.pc += 2
+		//reg.pc += 2
 	case 0xd3:
 		//not used
 	case 0xd4:
@@ -1941,7 +1935,7 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 	case 0xda:
 		value := mem.readWord(reg.pc)
 		reg.jpccnn(value, "C")
-		reg.pc += 2
+		//reg.pc += 2
 	case 0xdb:
 		//not used
 	case 0xdc:

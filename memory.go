@@ -22,13 +22,13 @@ func (mem Memory) readByte(address uint16) byte {
 		return mem.vram[address-0x8000]
 	} else if address >= 0xA000 && address < 0xC000 {
 		return mem.eram[address-0xA000]
-	} else if address > 0xC000 && address < 0xFE00 {
+	} else if address >= 0xC000 && address < 0xE000 {
 		return mem.wram[address-0xC000]
-	} else if address > 0xFE00 && address <= 0xFF00 {
+	} else if address >= 0xFE00 && address < 0xFF00 {
 		return mem.oam[address-0xFE00]
-	} else if address > 0xFF00 && address <= 0xFF80 {
+	} else if address >= 0xFF00 && address < 0xFF80 {
 		return mem.io[address-0xFF00]
-	} else if address > 0xFF80 && address <= 0xFFFF {
+	} else if address >= 0xFF80 && address < 0xFFFF {
 		return mem.hram[address-0xFF80]
 	} else {
 		return 0
