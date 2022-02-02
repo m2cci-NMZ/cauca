@@ -1048,26 +1048,28 @@ func (reg *Register) rrn(destination string) {
 
 // Shift register destination left
 func (reg *Register) slan(destination string) {
-	var register byte
-	switch destination {
-	case "A":
-		register = reg.a
-	case "B":
-		register = reg.b
-	case "C":
-		register = reg.c
-	case "D":
-		register = reg.d
-	case "E":
-		register = reg.e
-	case "H":
-		register = reg.h
-	case "L":
-		register = reg.l
+	reg_map := map[string]*byte{
+		"A": &(reg.a),
+		"B": &(reg.b),
+		"C": &(reg.c),
+		"D": &(reg.d),
+		"E": &(reg.e),
+		"H": &(reg.h),
+		"L": &(reg.l),
+	}
+	var register uint16
+	if destination == "HL" {
+		register = reg.getHLregister()
+	} else {
+		register = uint16(*reg_map[destination])
+	}
+	//carry flag
+	if hasBit(register, 0) {
+		reg.setRegisterFlag(true, 4)
+	} else {
+		reg.setRegisterFlag(false, 4)
 	}
 	value := register << 1
-	var mask byte = 1
-	value &^= mask
 	//zero flag
 	if value != 0 {
 		reg.setRegisterFlag(false, 7)
@@ -1078,52 +1080,42 @@ func (reg *Register) slan(destination string) {
 	reg.setRegisterFlag(false, 6)
 	// half carry flag
 	reg.setRegisterFlag(false, 5)
-	//carry flag
-	if register != 0 {
-		reg.setRegisterFlag(true, 4)
+	if destination == "HL" {
+		reg.setHLregisters(register)
 	} else {
-		reg.setRegisterFlag(false, 4)
-	}
-	switch destination {
-	case "A":
-		reg.a = value
-	case "B":
-		reg.b = value
-	case "C":
-		reg.c = value
-	case "D":
-		reg.d = value
-	case "E":
-		reg.e = value
-	case "H":
-		reg.h = value
-	case "L":
-		reg.l = value
+		*reg_map[destination] = byte(register)
 	}
 }
 
 // Shift register destination right
 func (reg *Register) sran(destination string) {
-	var register byte
-	switch destination {
-	case "A":
-		register = reg.a
-	case "B":
-		register = reg.b
-	case "C":
-		register = reg.c
-	case "D":
-		register = reg.d
-	case "E":
-		register = reg.e
-	case "H":
-		register = reg.h
-	case "L":
-		register = reg.l
+	reg_map := map[string]*byte{
+		"A": &(reg.a),
+		"B": &(reg.b),
+		"C": &(reg.c),
+		"D": &(reg.d),
+		"E": &(reg.e),
+		"H": &(reg.h),
+		"L": &(reg.l),
+	}
+	var register uint16
+	if destination == "HL" {
+		register = reg.getHLregister()
+	} else {
+		register = uint16(*reg_map[destination])
+	}
+	msb := hasBit(register, 7)
+	//carry flag
+	if hasBit(register, 7) {
+		reg.setRegisterFlag(true, 4)
+	} else {
+		reg.setRegisterFlag(false, 4)
 	}
 	value := register >> 1
-	if register&0x80 != 0 {
-		value |= (1 << 7)
+	if msb {
+		register |= (1 << 7)
+	} else {
+		register &^= (1 << 7)
 	}
 	//zero flag
 	if value != 0 {
@@ -1135,52 +1127,37 @@ func (reg *Register) sran(destination string) {
 	reg.setRegisterFlag(false, 6)
 	// half carry flag
 	reg.setRegisterFlag(false, 5)
-	//carry flag
-	if register != 0 {
-		reg.setRegisterFlag(true, 4)
+	if destination == "HL" {
+		reg.setHLregisters(register)
 	} else {
-		reg.setRegisterFlag(false, 4)
-	}
-	switch destination {
-	case "A":
-		reg.a = value
-	case "B":
-		reg.b = value
-	case "C":
-		reg.c = value
-	case "D":
-		reg.d = value
-	case "E":
-		reg.e = value
-	case "H":
-		reg.h = value
-	case "L":
-		reg.l = value
+		*reg_map[destination] = byte(register)
 	}
 }
 
 // Shift register destination right
 func (reg *Register) srln(destination string) {
-	var register byte
-	switch destination {
-	case "A":
-		register = reg.a
-	case "B":
-		register = reg.b
-	case "C":
-		register = reg.c
-	case "D":
-		register = reg.d
-	case "E":
-		register = reg.e
-	case "H":
-		register = reg.h
-	case "L":
-		register = reg.l
+	reg_map := map[string]*byte{
+		"A": &(reg.a),
+		"B": &(reg.b),
+		"C": &(reg.c),
+		"D": &(reg.d),
+		"E": &(reg.e),
+		"H": &(reg.h),
+		"L": &(reg.l),
+	}
+	var register uint16
+	if destination == "HL" {
+		register = reg.getHLregister()
+	} else {
+		register = uint16(*reg_map[destination])
+	}
+	//carry flag
+	if hasBit(register, 7) {
+		reg.setRegisterFlag(true, 4)
+	} else {
+		reg.setRegisterFlag(false, 4)
 	}
 	value := register >> 1
-	var mask byte = 1
-	value &^= (mask << 7)
 	//zero flag
 	if value != 0 {
 		reg.setRegisterFlag(false, 7)
@@ -1191,27 +1168,10 @@ func (reg *Register) srln(destination string) {
 	reg.setRegisterFlag(false, 6)
 	// half carry flag
 	reg.setRegisterFlag(false, 5)
-	//carry flag
-	if register != 0 {
-		reg.setRegisterFlag(true, 4)
+	if destination == "HL" {
+		reg.setHLregisters(register)
 	} else {
-		reg.setRegisterFlag(false, 4)
-	}
-	switch destination {
-	case "A":
-		reg.a = value
-	case "B":
-		reg.b = value
-	case "C":
-		reg.c = value
-	case "D":
-		reg.d = value
-	case "E":
-		reg.e = value
-	case "H":
-		reg.h = value
-	case "L":
-		reg.l = value
+		*reg_map[destination] = byte(register)
 	}
 }
 
