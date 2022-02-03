@@ -139,8 +139,8 @@ func (reg *Register) ldAn(source string, mem *Memory) {
 		"H":  uint16(reg.h),
 		"L":  uint16(reg.l),
 		"HL": reg.getHLregister(),
-		"BC": concatenateBytes(reg.b, reg.c),
-		"DE": concatenateBytes(reg.d, reg.e),
+		"BC": concatenateBytes(reg.c, reg.b),
+		"DE": concatenateBytes(reg.e, reg.d),
 		"PC": reg.pc,
 	}
 	reg.a = mem.readByte(reg_map[source])
@@ -162,9 +162,9 @@ func (reg *Register) ldnA(source string, mem *Memory) {
 	} else {
 		switch source {
 		case "BC":
-			mem.writeByte(concatenateBytes(reg.b, reg.c), reg.a)
+			mem.writeByte(concatenateBytes(reg.c, reg.b), reg.a)
 		case "DE":
-			mem.writeByte(concatenateBytes(reg.d, reg.e), reg.a)
+			mem.writeByte(concatenateBytes(reg.e, reg.d), reg.a)
 		case "HL":
 			mem.writeByte(reg.getHLregister(), reg.a)
 		case "PC":
@@ -1279,28 +1279,29 @@ func (reg *Register) jpHL() {
 }
 
 // Add n to PC
-func (reg *Register) jrn(n uint16) {
-	reg.pc += n
+func (reg *Register) jrn(n byte) {
+	reg.pc += uint16(n)
 }
 
 // Add n to PC if NZ flags
 func (reg *Register) jrccn(n byte, condition string) {
+	var offset uint16 = uint16(int8(n))
 	switch condition {
 	case "NZ":
 		if !hasBit(uint16(reg.flags), 7) {
-			reg.pc += uint16(n)
+			reg.pc += offset
 		}
 	case "Z":
 		if hasBit(uint16(reg.flags), 7) {
-			reg.pc += uint16(n)
+			reg.pc += offset
 		}
 	case "NC":
 		if !hasBit(uint16(reg.flags), 4) {
-			reg.pc += uint16(n)
+			reg.pc += offset
 		}
 	case "C":
 		if hasBit(uint16(reg.flags), 4) {
-			reg.pc += uint16(n)
+			reg.pc += offset
 		}
 	}
 }
@@ -1399,7 +1400,7 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 		reg.ldnnSP(value, mem)
 		reg.pc += 2
 	case 0x09:
-		value := concatenateBytes(reg.b, reg.c)
+		value := concatenateBytes(reg.c, reg.b)
 		reg.addHLn(value)
 	case 0x0a:
 		reg.ldAn("BC", mem)
@@ -1436,11 +1437,10 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 	case 0x17:
 		reg.rlA()
 	case 0x18:
-		value := mem.readWord(reg.pc)
+		value := mem.readByte(reg.pc)
 		reg.jrn(value)
-		reg.pc++
 	case 0x19:
-		value := mem.readWord(concatenateBytes(reg.d, reg.e))
+		value := mem.readWord(concatenateBytes(reg.e, reg.d))
 		reg.addHLn(value)
 	case 0x1a:
 		reg.ldAn("DE", mem)
@@ -1459,7 +1459,6 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 	case 0x20:
 		value := mem.readByte(reg.pc)
 		reg.jrccn(value, "NZ")
-		reg.pc++
 	case 0x21:
 		value := mem.readWord(reg.pc)
 		reg.ldnnn16(value, "HL")
@@ -1479,11 +1478,10 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 	case 0x27:
 		reg.dAA()
 	case 0x28:
-		value := mem.readWord(reg.pc)
+		value := mem.readByte(reg.pc)
 		reg.jrccn(value, "Z")
-		reg.pc++
 	case 0x29:
-		value := mem.readWord(concatenateBytes(reg.h, reg.l))
+		value := mem.readWord(concatenateBytes(reg.l, reg.h))
 		reg.addHLn(value)
 	case 0x2a:
 		reg.ldiAHL(mem)
@@ -1500,9 +1498,8 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 	case 0x2f:
 		reg.cpl()
 	case 0x30:
-		value := mem.readWord(reg.pc)
+		value := mem.readByte(reg.pc)
 		reg.jrccn(value, "NC")
-		reg.pc++
 	case 0x31:
 		reg.ldnnn16(reg.pc, "SP")
 		reg.pc += 2
@@ -1520,9 +1517,8 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 	case 0x37:
 		reg.scf()
 	case 0x38:
-		value := mem.readWord(reg.pc)
+		value := mem.readByte(reg.pc)
 		reg.jrccn(value, "C")
-		reg.pc++
 	case 0x39:
 		value := mem.readWord(reg.sp)
 		reg.addHLn(value)
@@ -1686,7 +1682,7 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 		value := reg.l
 		reg.addAn(value)
 	case 0x86:
-		value := mem.readByte(concatenateBytes(reg.h, reg.l))
+		value := mem.readByte(concatenateBytes(reg.l, reg.h))
 		reg.addAn(value)
 	case 0x87:
 		value := reg.a
@@ -1710,7 +1706,7 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 		value := reg.l
 		reg.addcAn(value)
 	case 0x8e:
-		value := mem.readByte(concatenateBytes(reg.h, reg.l))
+		value := mem.readByte(concatenateBytes(reg.l, reg.h))
 		reg.addcAn(value)
 	case 0x8f:
 		value := reg.a
@@ -1734,7 +1730,7 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 		value := reg.l
 		reg.subn(value)
 	case 0x96:
-		value := mem.readByte(concatenateBytes(reg.h, reg.l))
+		value := mem.readByte(concatenateBytes(reg.l, reg.h))
 		reg.subn(value)
 	case 0x97:
 		value := reg.a
@@ -1758,7 +1754,7 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 		value := reg.l
 		reg.sbcAn(value)
 	case 0x9e:
-		value := mem.readByte(concatenateBytes(reg.h, reg.l))
+		value := mem.readByte(concatenateBytes(reg.l, reg.h))
 		reg.sbcAn(value)
 	case 0x9f:
 		value := reg.a
@@ -1782,7 +1778,7 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 		value := reg.l
 		reg.andn(value)
 	case 0xa6:
-		value := mem.readByte(concatenateBytes(reg.h, reg.l))
+		value := mem.readByte(concatenateBytes(reg.l, reg.h))
 		reg.andn(value)
 	case 0xa7:
 		value := reg.a
@@ -1806,7 +1802,7 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 		value := reg.l
 		reg.xorn(value)
 	case 0xae:
-		value := mem.readByte(concatenateBytes(reg.h, reg.l))
+		value := mem.readByte(concatenateBytes(reg.l, reg.h))
 		reg.xorn(value)
 	case 0xaf:
 		value := reg.a
@@ -1830,7 +1826,7 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 		value := reg.l
 		reg.orn(value)
 	case 0xb6:
-		value := mem.readByte(concatenateBytes(reg.h, reg.l))
+		value := mem.readByte(concatenateBytes(reg.l, reg.h))
 		reg.orn(value)
 	case 0xb7:
 		value := reg.a
@@ -1854,7 +1850,7 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 		value := reg.l
 		reg.cpn(value)
 	case 0xbe:
-		value := mem.readByte(concatenateBytes(reg.h, reg.l))
+		value := mem.readByte(concatenateBytes(reg.l, reg.h))
 		reg.cpn(value)
 	case 0xbf:
 		value := reg.a
@@ -1993,7 +1989,7 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 	case 0xef:
 		//Reset
 	case 0xf0:
-		reg.ldAn("0xf0", mem)
+		reg.ldAn("PC", mem)
 		reg.pc++
 	case 0xf1:
 		reg.popnn("AF", mem)
