@@ -1280,7 +1280,8 @@ func (reg *Register) jpHL() {
 
 // Add n to PC
 func (reg *Register) jrn(n byte) {
-	reg.pc += uint16(n)
+	var offset uint16 = uint16(int8(n))
+	reg.pc += offset
 }
 
 // Add n to PC if NZ flags
@@ -1439,6 +1440,7 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 	case 0x18:
 		value := mem.readByte(reg.pc)
 		reg.jrn(value)
+		reg.pc++
 	case 0x19:
 		value := mem.readWord(concatenateBytes(reg.e, reg.d))
 		reg.addHLn(value)
@@ -1459,6 +1461,7 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 	case 0x20:
 		value := mem.readByte(reg.pc)
 		reg.jrccn(value, "NZ")
+		reg.pc++
 	case 0x21:
 		value := mem.readWord(reg.pc)
 		reg.ldnnn16(value, "HL")
@@ -1480,6 +1483,7 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 	case 0x28:
 		value := mem.readByte(reg.pc)
 		reg.jrccn(value, "Z")
+		reg.pc++
 	case 0x29:
 		value := mem.readWord(concatenateBytes(reg.l, reg.h))
 		reg.addHLn(value)
@@ -1500,6 +1504,7 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 	case 0x30:
 		value := mem.readByte(reg.pc)
 		reg.jrccn(value, "NC")
+		reg.pc++
 	case 0x31:
 		reg.ldnnn16(reg.pc, "SP")
 		reg.pc += 2
@@ -1519,6 +1524,7 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 	case 0x38:
 		value := mem.readByte(reg.pc)
 		reg.jrccn(value, "C")
+		reg.pc++
 	case 0x39:
 		value := mem.readWord(reg.sp)
 		reg.addHLn(value)
