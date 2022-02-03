@@ -18,19 +18,13 @@ func main() {
 	cpu.l = 0x4d
 	cpu.sp = 0xfffe
 	cpu.pc = 0x100
-	for i < 100000 {
-		if (cpu.pc >= 0x2817) && (cpu.pc <= 0x282a) {
-			fmt.Print(cpu.pc)
-		}
+	for i < 1000000 {
 		cpu.execute(memory.readByte(cpu.pc), &memory)
 		if cpu.pc == 0x282a {
 			var tmp []byte = memory.vram[:]
 			os.WriteFile("tile.bin", tmp, 0)
 		}
-		//if cpu.pc > 10280 && cpu.pc < 10284 {
-		//fmt.Print(cpu.pc, "\n")
-		//}
 		i++
 	}
-	//	fmt.Print(cpu.pc)
+	fmt.Print(cpu.pc)
 }

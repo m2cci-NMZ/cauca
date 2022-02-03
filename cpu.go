@@ -1506,7 +1506,8 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 		reg.jrccn(value, "NC")
 		reg.pc++
 	case 0x31:
-		reg.ldnnn16(reg.pc, "SP")
+		value := mem.readWord(reg.pc)
+		reg.ldnnn16(value, "SP")
 		reg.pc += 2
 	case 0x32:
 		reg.lddHLA(mem)
@@ -1995,7 +1996,8 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 	case 0xef:
 		//Reset
 	case 0xf0:
-		reg.ldAn("PC", mem)
+		value := mem.readByte(reg.pc)
+		reg.ldhAn(value, mem)
 		reg.pc++
 	case 0xf1:
 		reg.popnn("AF", mem)
