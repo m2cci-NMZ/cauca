@@ -1947,7 +1947,6 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 		reg.popnn("HL", mem)
 	case 0xe2:
 		reg.ldCA(mem)
-		reg.pc++
 	case 0xe3:
 		//not used
 	case 0xe4:

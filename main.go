@@ -18,8 +18,11 @@ func main() {
 	cpu.sp = 0xfffe
 	cpu.pc = 0x100
 	for i < 1000000 {
+		//debug
+		if cpu.pc == 0x2795 {
+			fmt.Println(cpu.pc)
+		}
 		cpu.execute(memory.readByte(cpu.pc), &memory)
 		i++
 	}
-	fmt.Print(cpu.pc)
 }
