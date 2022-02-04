@@ -17,7 +17,7 @@ func main() {
 	cpu.l = 0x4d
 	cpu.sp = 0xfffe
 	cpu.pc = 0x100
-	for i < 10000000 {
+	for i < 1000000 {
 		cpu.execute(memory.readByte(cpu.pc), &memory)
 		i++
 	}

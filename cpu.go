@@ -1868,7 +1868,6 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 	case 0xc4:
 		value := mem.readWord(reg.pc)
 		reg.callccnn(value, "NZ", mem)
-		reg.pc += 2
 	case 0xc5:
 		reg.pushnn("BC", mem)
 	case 0xc6:
@@ -1884,17 +1883,14 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 	case 0xca:
 		value := mem.readWord(reg.pc)
 		reg.jpccnn(value, "Z")
-		//reg.pc += 2
 	case 0xcb:
 		reg.executeCb(opcode)
 	case 0xcc:
 		value := mem.readWord(reg.pc)
 		reg.callccnn(value, "Z", mem)
-		reg.pc += 2
 	case 0xcd:
 		value := mem.readWord(reg.pc)
 		reg.callnn(value, mem)
-		reg.pc += 2
 	case 0xce:
 		value := mem.readByte(reg.pc)
 		reg.addcAn(value)
@@ -1914,7 +1910,6 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 	case 0xd4:
 		value := mem.readWord(reg.pc)
 		reg.callccnn(value, "NC", mem)
-		reg.pc += 2
 	case 0xd5:
 		reg.pushnn("DE", mem)
 	case 0xd6:
@@ -1936,7 +1931,6 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 	case 0xdc:
 		value := mem.readWord(reg.pc)
 		reg.callccnn(value, "C", mem)
-		reg.pc += 2
 	case 0xdd:
 		//not used
 	case 0xde:
