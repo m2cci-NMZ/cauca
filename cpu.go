@@ -1313,7 +1313,7 @@ func (reg *Register) jrccn(n byte, condition string) {
 
 // Push address of next instruction on top of stack and jump to destination
 func (reg *Register) callnn(destination uint16, mem *Memory) {
-	mem.writeWord(reg.sp, reg.pc+1)
+	mem.writeWord(reg.sp, reg.pc)
 	reg.sp += 2
 	reg.pc = destination
 }
@@ -1323,27 +1323,19 @@ func (reg *Register) callccnn(n uint16, condition string, mem *Memory) {
 	switch condition {
 	case "NZ":
 		if !hasBit(uint16(reg.flags), 7) {
-			mem.writeWord(reg.sp, reg.pc+1)
-			reg.sp++
-			reg.pc = n
+			reg.callnn(n, mem)
 		}
 	case "Z":
 		if hasBit(uint16(reg.flags), 7) {
-			mem.writeWord(reg.sp, reg.pc+1)
-			reg.sp++
-			reg.pc += n
+			reg.callnn(n, mem)
 		}
 	case "NC":
 		if !hasBit(uint16(reg.flags), 4) {
-			mem.writeWord(reg.sp, reg.pc+1)
-			reg.sp++
-			reg.pc += n
+			reg.callnn(n, mem)
 		}
 	case "C":
 		if hasBit(uint16(reg.flags), 4) {
-			mem.writeWord(reg.sp, reg.pc+1)
-			reg.sp++
-			reg.pc += n
+			reg.callnn(n, mem)
 		}
 	}
 }

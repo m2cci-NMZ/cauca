@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 )
 
 func main() {
@@ -18,12 +17,8 @@ func main() {
 	cpu.l = 0x4d
 	cpu.sp = 0xfffe
 	cpu.pc = 0x100
-	for i < 1000000 {
+	for i < 10000000 {
 		cpu.execute(memory.readByte(cpu.pc), &memory)
-		if cpu.pc == 0x282a {
-			var tmp []byte = memory.vram[:]
-			os.WriteFile("tile.bin", tmp, 0)
-		}
 		i++
 	}
 	fmt.Print(cpu.pc)
