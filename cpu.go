@@ -391,6 +391,8 @@ func (reg *Register) andn(value byte) {
 	// zero flag
 	if result == 0 {
 		reg.setRegisterFlag(true, 7)
+	} else {
+		reg.setRegisterFlag(false, 7)
 	}
 	// negative flag
 	reg.setRegisterFlag(false, 6)
@@ -407,6 +409,8 @@ func (reg *Register) orn(value byte) {
 	// zero flag
 	if result == 0 {
 		reg.setRegisterFlag(true, 7)
+	} else {
+		reg.setRegisterFlag(false, 7)
 	}
 	// negative flag
 	reg.setRegisterFlag(false, 6)
@@ -423,6 +427,8 @@ func (reg *Register) xorn(value byte) {
 	// zero flag
 	if result == 0 {
 		reg.setRegisterFlag(true, 7)
+	} else {
+		reg.setRegisterFlag(false, 7)
 	}
 	// negative flag
 	reg.setRegisterFlag(false, 6)

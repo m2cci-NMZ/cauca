@@ -19,7 +19,7 @@ func main() {
 	cpu.pc = 0x100
 	for i < 1000000 {
 		//debug
-		if cpu.pc == 0x2798 {
+		if cpu.pc == 0x27a0 {
 			fmt.Println(cpu.pc)
 		}
 		cpu.execute(memory.readByte(cpu.pc), &memory)
