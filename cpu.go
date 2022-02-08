@@ -1319,6 +1319,7 @@ func (reg *Register) jrccn(n byte, condition string) {
 
 // Push address of next instruction on top of stack and jump to destination
 func (reg *Register) callnn(destination uint16, mem *Memory) {
+	reg.pc += 2
 	mem.writeWord(reg.sp, reg.pc)
 	reg.sp -= 2
 	reg.pc = destination
@@ -1352,9 +1353,9 @@ func (reg *Register) callccnn(n uint16, condition string, mem *Memory) {
 
 // Pop value from stack and jump
 func (reg *Register) ret(mem *Memory) {
+	reg.sp += 2
 	address := mem.readWord(reg.sp)
 	reg.pc = address
-	reg.sp += 2
 }
 
 // Pop value from stack and jump if condition
