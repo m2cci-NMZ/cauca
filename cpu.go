@@ -1896,6 +1896,7 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 		value := mem.readWord(reg.pc)
 		reg.jpccnn(value, "Z")
 	case 0xcb:
+		opcode = mem.readByte(reg.pc)
 		reg.executeCb(opcode)
 	case 0xcc:
 		value := mem.readWord(reg.pc)
