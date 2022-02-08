@@ -1251,6 +1251,11 @@ func (reg *Register) resBr(destination string, pos uint16) {
 /* Jumps                                   */
 /* *************************************** */
 
+//Reset: push address to stack and jump to destination
+func (reg *Register) rst(destination uint16, mem *Memory) {
+	reg.callnn(destination, mem)
+}
+
 // Jump at address destination
 func (reg *Register) jpnn(destination uint16) {
 	reg.pc = destination
@@ -1872,7 +1877,6 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 	case 0xc3:
 		value := mem.readWord(reg.pc)
 		reg.jpnn(value)
-		//reg.pc += 2
 	case 0xc4:
 		value := mem.readWord(reg.pc)
 		reg.callccnn(value, "NZ", mem)
@@ -1883,7 +1887,7 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 		reg.addAn(value)
 		reg.pc++
 	case 0xc7:
-		//reset
+		reg.rst(0, mem)
 	case 0xc8:
 		reg.retcc(mem, "Z")
 	case 0xc9:
@@ -1904,7 +1908,7 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 		reg.addcAn(value)
 		reg.pc++
 	case 0xcf:
-		//reset
+		reg.rst(0x08, mem)
 	case 0xd0:
 		reg.retcc(mem, "NC")
 	case 0xd1:
@@ -1925,7 +1929,7 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 		reg.subn(value)
 		reg.pc++
 	case 0xd7:
-		//reset
+		reg.rst(0x10, mem)
 	case 0xd8:
 		reg.retcc(mem, "C")
 	case 0xd9:
@@ -1933,7 +1937,6 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 	case 0xda:
 		value := mem.readWord(reg.pc)
 		reg.jpccnn(value, "C")
-		//reg.pc += 2
 	case 0xdb:
 		//not used
 	case 0xdc:
@@ -1946,7 +1949,7 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 		reg.sbcAn(value)
 		reg.pc++
 	case 0xdf:
-		//reset
+		reg.rst(0x18, mem)
 	case 0xe0:
 		value := mem.readByte(reg.pc)
 		reg.ldhnA(value, mem)
@@ -1966,7 +1969,7 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 		reg.andn(value)
 		reg.pc++
 	case 0xe7:
-		//reset
+		reg.rst(0x20, mem)
 	case 0xe8:
 		value := mem.readWord(reg.pc)
 		reg.addSPn(value)
@@ -1987,7 +1990,7 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 		reg.xorn(value)
 		reg.pc++
 	case 0xef:
-		//Reset
+		reg.rst(0x28, mem)
 	case 0xf0:
 		value := mem.readByte(reg.pc)
 		reg.ldhAn(value, mem)
@@ -2008,7 +2011,7 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 		reg.orn(value)
 		reg.pc++
 	case 0xf7:
-		//reset
+		reg.rst(0x30, mem)
 	case 0xf8:
 		value := mem.readByte(reg.pc)
 		reg.ldHLSPn(value)
@@ -2030,7 +2033,7 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 		reg.cpn(value)
 		reg.pc++
 	case 0xff:
-		//reset
+		reg.rst(0x38, mem)
 	}
 }
 
