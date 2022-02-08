@@ -47,13 +47,13 @@ func (mem *Memory) writeByte(address uint16, value byte) {
 		mem.vram[address-0x8000] = value
 	} else if address >= 0xA000 && address < 0xC000 {
 		mem.eram[address-0xA000] = value
-	} else if address > 0xC000 && address < 0xE000 {
+	} else if address >= 0xC000 && address < 0xE000 {
 		mem.wram[address-0xC000] = value
-	} else if address > 0xFE00 && address <= 0xFF00 {
+	} else if address >= 0xFE00 && address <= 0xFF00 {
 		mem.oam[address-0xFE00] = value
-	} else if address > 0xFF00 && address <= 0xFF80 {
+	} else if address >= 0xFF00 && address <= 0xFF80 {
 		mem.io[address-0xFF00] = value
-	} else if address > 0xFF80 && address <= 0xFFFF {
+	} else if address >= 0xFF80 && address <= 0xFFFF {
 		mem.hram[address-0xFF80] = value
 	}
 }
