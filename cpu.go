@@ -217,7 +217,17 @@ func (reg *Register) ldiHLA(mem *Memory) {
 
 // Load value in register A in io memory bank at address value
 func (reg *Register) ldhnA(value byte, mem *Memory) {
-	mem.io[value] = reg.a
+	if value == 0 {
+		if reg.a == 0x20 {
+			mem.io[0] = 0xef
+		} else if reg.a == 0x10 {
+			mem.io[0] = 0xdf
+		} else {
+			mem.io[value] = reg.a
+		}
+	} else {
+		mem.io[value] = reg.a
+	}
 }
 
 // Load value in io memory bank at address value in register A
