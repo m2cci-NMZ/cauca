@@ -552,7 +552,7 @@ func (reg *Register) addHLn(value uint16) {
 		reg.setRegisterFlag(false, 4)
 	}
 	// half carry flag
-	if (value&0x0ff + HL&0x0ff) > 0x0ff {
+	if (value&0x0fff + HL&0x0fff) > 0x0fff {
 		reg.setRegisterFlag(true, 5)
 	} else {
 		reg.setRegisterFlag(false, 5)
