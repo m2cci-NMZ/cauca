@@ -552,7 +552,7 @@ func (reg *Register) addHLn(value uint16) {
 		reg.setRegisterFlag(false, 4)
 	}
 	// half carry flag
-	if ((uint16(result) & 0x0F) + (value & 0x0F)) > 0x0F {
+	if (value&0x0ff + HL&0x0ff) > 0x0ff {
 		reg.setRegisterFlag(true, 5)
 	} else {
 		reg.setRegisterFlag(false, 5)
@@ -1465,7 +1465,7 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 		reg.jrn(value)
 		reg.pc++
 	case 0x19:
-		value := mem.readWord(concatenateBytes(reg.e, reg.d))
+		value := concatenateBytes(reg.e, reg.d)
 		reg.addHLn(value)
 	case 0x1a:
 		reg.ldAn("DE", mem)
@@ -1508,7 +1508,7 @@ func (reg *Register) execute(opcode byte, mem *Memory) {
 		reg.jrccn(value, "Z")
 		reg.pc++
 	case 0x29:
-		value := mem.readWord(concatenateBytes(reg.l, reg.h))
+		value := concatenateBytes(reg.l, reg.h)
 		reg.addHLn(value)
 	case 0x2a:
 		reg.ldiAHL(mem)
