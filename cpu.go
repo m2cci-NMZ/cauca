@@ -1269,6 +1269,8 @@ func (reg *Register) resBr(destination string, pos uint16) {
 
 //Reset: push address to stack and jump to destination
 func (reg *Register) rst(destination uint16, mem *Memory) {
+	//hotfix: rst has no arguments so next instruction is at pc + 1, while it is at pc + 2 for call
+	reg.pc--
 	reg.callnn(destination, mem)
 }
 
