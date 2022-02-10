@@ -345,6 +345,12 @@ func (reg *Register) addAn(value byte) {
 		reg.setRegisterFlag(false, 4)
 	}
 	// zero flag
+	if result == 0 {
+		reg.setRegisterFlag(true, 7)
+	} else {
+		reg.setRegisterFlag(false, 7)
+	}
+	// negative flag
 	reg.setRegisterFlag(false, 6)
 	// half carry flag
 	if (reg.a&0x0F + value&0x0F) > 0x0F {
