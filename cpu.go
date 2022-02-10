@@ -312,8 +312,9 @@ func (reg *Register) pushnn(registers string, mem *Memory) {
 
 // Pop 16 bits on top of the stack and put in pair of registers and increment SP twice
 func (reg *Register) popnn(registers string, mem *Memory) {
-	r1 := mem.readByte(reg.sp)
-	r2 := mem.readByte(reg.sp + 1)
+	reg.sp += 2
+	r2 := mem.readByte(reg.sp)
+	r1 := mem.readByte(reg.sp + 1)
 	switch registers {
 	case "AF":
 		reg.a = r1
@@ -328,7 +329,6 @@ func (reg *Register) popnn(registers string, mem *Memory) {
 		reg.h = r1
 		reg.l = r2
 	}
-	reg.sp = reg.sp + 2
 }
 
 /* *************************************** */
