@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 )
 
 func main() {
@@ -18,12 +19,14 @@ func main() {
 	cpu.sp = 0xfffe
 	cpu.pc = 0x100
 	memory.writeByte(0xff44, 0x91)
-	for i < 1000000 {
+	//for i < 1000000 {
+	for cpu.pc != 0x27d6 {
 		//debug
-		if cpu.pc == 0x27c9 {
+		if cpu.pc == 0x27d6 {
 			fmt.Println(cpu.pc)
 		}
 		cpu.execute(memory.readByte(cpu.pc), &memory)
 		i++
 	}
+	os.WriteFile("tile.bin", memory.vram[:], 0777)
 }
