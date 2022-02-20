@@ -21,11 +21,11 @@ func main() {
 	cpu.sp = 0xfffe
 	cpu.pc = 0x100
 	display.init()
-	memory.writeByte(0xff44, 0x91)
+	//memory.writeByte(0xff44, 0x94)
 	for display.running {
-		//for cpu.pc != 0x27d6 {
+		//for cpu.pc != 0x1794 {
 		//debug
-		if cpu.pc == 0x27d6 {
+		if cpu.pc == 0x382 {
 			fmt.Println(cpu.pc)
 		}
 		cpu.execute(memory.readByte(cpu.pc), &memory)
