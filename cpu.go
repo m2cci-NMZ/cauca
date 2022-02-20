@@ -1399,7 +1399,7 @@ func (reg *Register) retcc(mem *Memory, condition string) {
 // Execute opcode
 func (reg *Register) execute(opcode byte, mem *Memory) {
 	reg.pc++
-	reg.clock += ticks[opcode]
+	reg.clock = ticks[opcode]
 	switch opcode {
 	case 0x00:
 		//nop
