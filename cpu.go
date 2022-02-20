@@ -377,9 +377,11 @@ func (reg *Register) subn(value byte) {
 	// zero flag
 	if result == 0 {
 		reg.setRegisterFlag(true, 7)
+	} else {
+		reg.setRegisterFlag(false, 7)
 	}
 	// half carry flag
-	if (reg.a&0x0F + value&0x0F) > 0x0F {
+	if reg.a&0x0F < value&0x0F {
 		reg.setRegisterFlag(true, 5)
 	} else {
 		reg.setRegisterFlag(false, 5)
