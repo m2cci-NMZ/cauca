@@ -17,6 +17,7 @@ func (gpu *Gpu) step(cpu Register, mem Memory) {
 		if gpu.mode_clock >= 204 {
 			gpu.mode_clock = 0
 			gpu.line++
+			mem.writeByte(0xff44, gpu.line)
 			if gpu.line == 143 {
 				// last vblank, render the framebuffer
 				gpu.mode = 1
@@ -30,6 +31,7 @@ func (gpu *Gpu) step(cpu Register, mem Memory) {
 		if gpu.mode_clock >= 456 {
 			gpu.mode_clock = 0
 			gpu.line++
+			mem.writeByte(0xff44, gpu.line)
 			if gpu.line > 153 {
 				// Restart scanning
 				gpu.mode = 2
