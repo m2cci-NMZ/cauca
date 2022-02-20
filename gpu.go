@@ -8,7 +8,7 @@ type Gpu struct {
 	rendering    bool
 }
 
-func (gpu *Gpu) step(cpu Register, mem Memory) {
+func (gpu *Gpu) step(cpu Register, mem *Memory) {
 	gpu.mode_clock += cpu.clock
 	gpu.rendering = false
 	switch gpu.mode {
@@ -50,7 +50,7 @@ func (gpu *Gpu) step(cpu Register, mem Memory) {
 			gpu.mode_clock = 0
 			gpu.mode = 0
 			//write scanline to frame buffer
-			gpu.writeScanline(mem)
+			gpu.writeScanline(*mem)
 		}
 	}
 }

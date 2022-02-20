@@ -29,7 +29,7 @@ func main() {
 			fmt.Println(cpu.pc)
 		}
 		cpu.execute(memory.readByte(cpu.pc), &memory)
-		gpu.step(cpu, memory)
+		gpu.step(cpu, &memory)
 		display.display(gpu)
 		//i++
 	}
