@@ -113,3 +113,18 @@ func (gpu *Gpu) writeScanline(mem Memory) {
 		gpu.frame_buffer[x][y] = color
 	}
 }
+
+func (gpu *Gpu) getVram(mem Memory) [26][8]byte {
+	var vram [26][8]byte
+	for byte_index := 0; byte_index < 26; byte_index++ {
+		for i := 1; i < 8; i++ {
+			var mask byte = 1 << i
+			pixel1 := mem.vram[byte_index*2]
+			pixel2 := mem.vram[byte_index*2+1]
+			a := (pixel1 & mask) >> i
+			b := (pixel2 & mask) >> i
+			vram[byte_index][i] = a + b
+		}
+	}
+	return vram
+}
