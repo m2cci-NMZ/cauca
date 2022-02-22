@@ -15,12 +15,12 @@ type Display struct {
 	running      bool
 }
 
-const tile_size int = 2
+const tile_size int = 4
 
 func (display *Display) init() int {
 	var err error
 	display.window, err = sdl.CreateWindow("GB", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED,
-		160, 144, sdl.WINDOW_SHOWN)
+		160*int32(tile_size), 144*int32(tile_size), sdl.WINDOW_SHOWN)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to create window: %s\n", err)
 		return 1
@@ -64,9 +64,9 @@ func (display *Display) display(gpu Gpu) int {
 	if gpu.rendering {
 		display.renderer.SetDrawColor(255, 255, 255, 0)
 		display.renderer.Clear()
-		for x := 1; x < 160; x++ {
-			for y := 1; y < 144; y++ {
-				if gpu.frame_buffer[x][y] > 0 {
+		for x := 1; x < 160*tile_size; x++ {
+			for y := 1; y < 144*tile_size; y++ {
+				if gpu.frame_buffer[x/tile_size][y/tile_size] > 0 {
 					display.renderer.SetDrawColor(0, 0, 0, 255)
 					display.renderer.DrawPoint(int32(x), int32(y))
 				}
