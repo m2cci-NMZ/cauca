@@ -8,6 +8,8 @@ type Gpu struct {
 	rendering    bool
 }
 
+const numtiles int = 60
+
 func (gpu *Gpu) step(cpu Register, mem *Memory) {
 	gpu.mode_clock += cpu.clock
 	gpu.rendering = false
@@ -59,64 +61,55 @@ func (gpu *Gpu) writeScanline(mem Memory) {
 	scrollY := mem.readByte(0xff42)
 	scrollX := mem.readByte(0xff43)
 	var unsigned bool = true
-	var mapoffset uint16
-	var bgmemory uint16
-	// background map has a base offeset in vram that is
-	// set according to the value of bit 4 of the LCD register
-	// (adress 0xff40)
-	bgmap := hasBit(uint16(mem.readByte(0xff40)), 4)
-	bgmem := hasBit(uint16(mem.readByte(0xff40)), 3)
-	if bgmap {
-		mapoffset = 0x8800
+	var data_region uint16
+	var map_region uint16
+	bgmapselector := hasBit(uint16(mem.readByte(0xff40)), 4)
+	bgmemselector := hasBit(uint16(mem.readByte(0xff40)), 3)
+	if !bgmapselector {
+		data_region = 0x8800
 		unsigned = false
 	} else {
-		mapoffset = 0x8000
+		data_region = 0x8000
 	}
-	if bgmem {
-		bgmemory = 0x9C00
+	if bgmemselector {
+		map_region = 0x9C00
 	} else {
-		bgmemory = 0x9800
+		map_region = 0x9800
 	}
 
 	y := gpu.line + scrollY
-	row := y / 8 * 32
+	map_line := y / 8 * 32
+	tile_line := y % 8
 
-	for pixel := 1; pixel < 160; pixel++ {
+	for pixel := 1; pixel < 160; pixel += 8 {
 		x := byte(pixel) + scrollX
-		col := x / 8
-		tileaddress := bgmemory + uint16(row) + uint16(col)
-		tilenum := mem.readByte(tileaddress)
-		var tileloc byte
-		if !unsigned && tilenum < 128 {
-			tileloc = (tilenum+128)/16 + byte(mapoffset)
-		} else {
-			tileloc = tilenum/16 + byte(mapoffset)
+		map_col := x / 8
+		tileaddress := map_region + uint16(map_line) + uint16(map_col)
+		tile_id := mem.readByte(tileaddress)
+		if !unsigned && tile_id < 128 {
+			tile_id += 128
 		}
-		line := y % 8
-		line *= 2
-		byte1 := mem.readByte(uint16(tileloc + line))
-		byte2 := mem.readByte(uint16(tileloc+line) + 1)
-		bitpos := ((int(x) % 8) - 7) * -1
+		tile_data_location := data_region + uint16(tile_id)*16
+		tile_data_line := tile_data_location + uint16(tile_line)*2
 
-		data1 := hasBit(uint16(byte1), uint16(bitpos))
-		data2 := hasBit(uint16(byte2), uint16(bitpos))
-		var color int
-		if data1 && data2 {
-			color = 3
-		} else if data1 && !data2 {
-			color = 2
-		} else if !data1 && data2 {
-			color = 1
-		} else {
-			color = 0
+		data_byte_1 := mem.readByte(tile_data_line)
+		data_byte_2 := mem.readByte(tile_data_line + 1)
+
+		for i := 0; i < 8; i++ {
+			pixel_1 := hasBit(uint16(data_byte_1), uint16(8-i))
+			pixel_2 := hasBit(uint16(data_byte_2), uint16(8-i))
+			if pixel_1 || pixel_2 {
+				gpu.frame_buffer[map_col*8+byte(i)][y] = 1
+			} else {
+				gpu.frame_buffer[map_col*8+byte(i)][y] = 0
+			}
 		}
-		gpu.frame_buffer[x][y] = color
 	}
 }
 
-func (gpu *Gpu) getVram(mem Memory) [26][8]byte {
-	var vram [26][8]byte
-	for byte_index := 0; byte_index < 26; byte_index++ {
+func (gpu *Gpu) getVram(mem Memory) [numtiles * 8][8]byte {
+	var vram [numtiles * 8][8]byte
+	for byte_index := 0; byte_index < numtiles*8; byte_index++ {
 		for i := 1; i < 8; i++ {
 			var mask byte = 1 << i
 			pixel1 := mem.vram[byte_index*2]
