@@ -37,7 +37,7 @@ func (display *Display) init() int {
 func (display *Display) initVramViewer() int {
 	var err error
 	display.vramWindow, err = sdl.CreateWindow("GB", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED,
-		8*int32(tile_size), int32(numtiles)*8*int32(tile_size), sdl.WINDOW_SHOWN)
+		8*16, 8*16, sdl.WINDOW_SHOWN)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to create window: %s\n", err)
 		return 1
@@ -84,11 +84,17 @@ func (display *Display) displayVram(gpu Gpu, mem Memory) int {
 	if gpu.rendering {
 		display.vramRenderer.SetDrawColor(255, 255, 255, 0)
 		display.vramRenderer.Clear()
-		for x := 0; x < 8*tile_size; x++ {
-			for y := 0; y < numtiles*8*tile_size; y++ {
-				if vram[y/tile_size][x/tile_size] > 0 {
+		var screenx int = 0
+		var screeny int = 0
+		for y, slice := range vram {
+			for x, pixel := range slice {
+				if y%(8*16) == 0 && y != 0 {
+					screenx += 8
+					screeny += 8
+				}
+				if pixel > 0 {
 					display.vramRenderer.SetDrawColor(0, 0, 0, 255)
-					display.vramRenderer.DrawPoint(int32(x), int32(y))
+					display.vramRenderer.DrawPoint(int32(screenx+x), int32(screeny+y%(8*16)))
 				}
 			}
 		}
