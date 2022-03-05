@@ -8,7 +8,7 @@ type Gpu struct {
 	rendering    bool
 }
 
-const numtiles int = 256
+const numtiles int = 512
 
 func (gpu *Gpu) step(cpu Register, mem *Memory) {
 	gpu.mode_clock += cpu.clock
