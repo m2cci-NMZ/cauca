@@ -86,10 +86,10 @@ func (display *Display) displayVram(gpu Gpu, mem Memory) int {
 		display.vramRenderer.Clear()
 		var screenx int = 0
 		for y, slice := range vram {
+			if y%(8*16) == 0 && y != 0 {
+				screenx += 8
+			}
 			for x, pixel := range slice {
-				if y%(8*16) == 0 && y != 0 {
-					screenx += 8
-				}
 				if pixel > 0 {
 					display.vramRenderer.SetDrawColor(0, 0, 0, 255)
 					display.vramRenderer.DrawPoint(int32(screenx+x), int32(y%(8*16)))

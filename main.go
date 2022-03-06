@@ -25,9 +25,9 @@ func main() {
 	display.initVramViewer()
 	//memory.writeByte(0xff44, 0x94)
 	for display.running {
-		//for cpu.pc != 0x2a0 {
+		//for cpu.pc != 0x2a6 {
 		//debug
-		if cpu.pc == 0x02a6 {
+		if cpu.pc == 0x29a6 {
 			fmt.Println(cpu.pc)
 		}
 		cpu.execute(memory.readByte(cpu.pc), &memory)
