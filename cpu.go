@@ -1305,19 +1305,25 @@ func (reg *Register) jpccnn(destination uint16, condition string) {
 	case "NZ":
 		if !hasBit(uint16(reg.flags), 7) {
 			reg.pc = destination
+			reg.clock = 16
 		}
 	case "Z":
 		if hasBit(uint16(reg.flags), 7) {
 			reg.pc = destination
+			reg.clock = 16
 		}
 	case "NC":
 		if !hasBit(uint16(reg.flags), 4) {
 			reg.pc = destination
+			reg.clock = 16
 		}
 	case "C":
 		if hasBit(uint16(reg.flags), 4) {
 			reg.pc = destination
+			reg.clock = 16
 		}
+	default:
+		reg.clock = 12
 	}
 }
 
@@ -1340,19 +1346,25 @@ func (reg *Register) jrccn(n byte, condition string) {
 	case "NZ":
 		if !hasBit(uint16(reg.flags), 7) {
 			reg.pc += offset
+			reg.clock = 12
 		}
 	case "Z":
 		if hasBit(uint16(reg.flags), 7) {
 			reg.pc += offset
+			reg.clock = 12
 		}
 	case "NC":
 		if !hasBit(uint16(reg.flags), 4) {
 			reg.pc += offset
+			reg.clock = 12
 		}
 	case "C":
 		if hasBit(uint16(reg.flags), 4) {
 			reg.pc += offset
+			reg.clock = 12
 		}
+	default:
+		reg.clock = 8
 	}
 }
 
@@ -1374,19 +1386,25 @@ func (reg *Register) callccnn(n uint16, condition string, mem *Memory) {
 	case "NZ":
 		if !hasBit(uint16(reg.flags), 7) {
 			reg.callnn(n, mem)
+			reg.clock = 24
 		}
 	case "Z":
 		if hasBit(uint16(reg.flags), 7) {
 			reg.callnn(n, mem)
+			reg.clock = 24
 		}
 	case "NC":
 		if !hasBit(uint16(reg.flags), 4) {
 			reg.callnn(n, mem)
+			reg.clock = 24
 		}
 	case "C":
 		if hasBit(uint16(reg.flags), 4) {
 			reg.callnn(n, mem)
+			reg.clock = 24
 		}
+	default:
+		reg.clock = 12
 	}
 }
 
@@ -1405,12 +1423,18 @@ func (reg *Register) ret(mem *Memory) {
 func (reg *Register) retcc(mem *Memory, condition string) {
 	if condition == "NZ" && !hasBit(uint16(reg.flags), 7) {
 		reg.ret(mem)
+		reg.clock = 20
 	} else if condition == "Z" && hasBit(uint16(reg.flags), 7) {
 		reg.ret(mem)
+		reg.clock = 20
 	} else if condition == "NC" && !hasBit(uint16(reg.flags), 4) {
 		reg.ret(mem)
+		reg.clock = 20
 	} else if condition == "C" && hasBit(uint16(reg.flags), 4) {
 		reg.ret(mem)
+		reg.clock = 20
+	} else {
+		reg.clock = 8
 	}
 }
 
