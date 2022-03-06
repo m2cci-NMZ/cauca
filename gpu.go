@@ -3,7 +3,7 @@ package main
 type Gpu struct {
 	mode         int
 	mode_clock   int
-	line         byte
+	line         int
 	frame_buffer [160][144]int
 	rendering    bool
 }
@@ -19,7 +19,7 @@ func (gpu *Gpu) step(cpu Register, mem *Memory) {
 		if gpu.mode_clock >= 204 {
 			gpu.mode_clock = 0
 			gpu.line++
-			mem.writeByte(0xff44, gpu.line)
+			mem.writeByte(0xff44, byte(gpu.line))
 			if gpu.line == 143 {
 				// last vblank, render the framebuffer
 				gpu.mode = 1
@@ -33,7 +33,7 @@ func (gpu *Gpu) step(cpu Register, mem *Memory) {
 		if gpu.mode_clock >= 456 {
 			gpu.mode_clock = 0
 			gpu.line++
-			mem.writeByte(0xff44, gpu.line)
+			mem.writeByte(0xff44, byte(gpu.line))
 			if gpu.line > 153 {
 				// Restart scanning
 				gpu.mode = 2
@@ -58,8 +58,8 @@ func (gpu *Gpu) step(cpu Register, mem *Memory) {
 }
 
 func (gpu *Gpu) writeScanline(mem Memory) {
-	scrollY := mem.readByte(0xff42)
-	scrollX := mem.readByte(0xff43)
+	scrollY := int(mem.readByte(0xff42))
+	scrollX := int(mem.readByte(0xff43))
 	var unsigned bool = true
 	var data_region uint16
 	var map_region uint16
@@ -82,7 +82,7 @@ func (gpu *Gpu) writeScanline(mem Memory) {
 	tile_line := y % 8
 
 	for pixel := 1; pixel < 160; pixel += 8 {
-		x := byte(pixel) + scrollX
+		x := pixel + scrollX
 		map_col := x / 8
 		tileaddress := map_region + uint16(map_line) + uint16(map_col)
 		tile_id := mem.readByte(tileaddress)
@@ -99,9 +99,9 @@ func (gpu *Gpu) writeScanline(mem Memory) {
 			pixel_1 := hasBit(uint16(data_byte_1), uint16(8-i))
 			pixel_2 := hasBit(uint16(data_byte_2), uint16(8-i))
 			if pixel_1 || pixel_2 {
-				gpu.frame_buffer[map_col*8+byte(i)][y] = 1
+				gpu.frame_buffer[map_col*8+i][y] = 1
 			} else {
-				gpu.frame_buffer[map_col*8+byte(i)][y] = 0
+				gpu.frame_buffer[map_col*8+i][y] = 0
 			}
 		}
 	}
