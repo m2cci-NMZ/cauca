@@ -98,11 +98,9 @@ func (gpu *Gpu) writeScanline(mem Memory) {
 		for i := 0; i < 8; i++ {
 			pixel_1 := hasBit(uint16(data_byte_1), uint16(8-i))
 			pixel_2 := hasBit(uint16(data_byte_2), uint16(8-i))
-			if pixel_1 || pixel_2 {
-				gpu.frame_buffer[map_col*8+i][y] = 1
-			} else {
-				gpu.frame_buffer[map_col*8+i][y] = 0
-			}
+			color := gpu.getColor(pixel_1, pixel_2, mem)
+			gpu.frame_buffer[map_col*8+i][y] = color
+
 		}
 	}
 }
@@ -120,4 +118,36 @@ func (gpu *Gpu) getVram(mem Memory) [numtiles * 8][8]byte {
 		}
 	}
 	return vram
+}
+
+func (gpu *Gpu) getColor(pixel1 bool, pixel2 bool, mem Memory) int {
+	var palette byte = mem.readByte(0xff47)
+	var hi, lo byte
+	switch true {
+	case (!pixel1 && !pixel2):
+		hi = 1
+		lo = 0
+	case (!pixel1 && pixel2):
+		hi = 3
+		lo = 2
+	case (pixel1 && !pixel2):
+		hi = 5
+		lo = 4
+	default:
+		hi = 7
+		lo = 6
+	}
+	color1 := hasBit(uint16(palette), uint16(hi))
+	color2 := hasBit(uint16(palette), uint16(lo))
+	if color1 && color2 {
+		return 3
+	}
+	if color1 && !color2 {
+		return 2
+	}
+	if !color1 && color2 {
+		return 1
+	} else {
+		return 0
+	}
 }
