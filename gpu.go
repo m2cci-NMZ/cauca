@@ -1,11 +1,22 @@
 package main
 
 type Gpu struct {
-	mode         int
-	mode_clock   int
-	line         int
-	frame_buffer [160][144]int
-	rendering    bool
+	mode           int
+	mode_clock     int
+	line           int
+	frame_buffer   [160][144]int
+	rendering      bool
+	lcd            bool
+	scrollX        int
+	scrollY        int
+	sprite         bool
+	background     bool
+	sprite_size    bool
+	background_map bool
+	background_set bool
+	window         bool
+	window_map     bool
+	display        bool
 }
 
 const numtiles int = 512
@@ -150,4 +161,16 @@ func (gpu *Gpu) getColor(pixel1 bool, pixel2 bool, mem Memory) int {
 	} else {
 		return 0
 	}
+}
+
+func (gpu *Gpu) setGpuControl(mem Memory) {
+	gpuRegister := mem.readByte(0xff40)
+	gpu.lcd = hasBit(uint16(gpuRegister), 0)
+	gpu.sprite = hasBit(uint16(gpuRegister), 1)
+	gpu.sprite_size = hasBit(uint16(gpuRegister), 2)
+	gpu.background_map = hasBit(uint16(gpuRegister), 3)
+	gpu.background_set = hasBit(uint16(gpuRegister), 4)
+	gpu.window = hasBit(uint16(gpuRegister), 5)
+	gpu.window_map = hasBit(uint16(gpuRegister), 6)
+	gpu.display = hasBit(uint16(gpuRegister), 7)
 }
